@@ -1,73 +1,65 @@
-# React + TypeScript + Vite
+# TPASS Calculator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A Progressive Web App (PWA) for tracking your TPASS transit card savings in Taiwan.
 
-Currently, two official plugins are available:
+## What is TPASS?
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+TPASS is Taiwan's monthly transit pass (NT$1,200/month) that provides unlimited rides on metro, bus, and other public transportation. This app helps you track whether you're getting your money's worth.
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Trip Recording** - Log trips with automatic fare calculation
+- **Savings Tracker** - Visual progress showing how much you've saved (or need to ride more)
+- **Quick Commute** - One-tap buttons for daily commute routes
+- **Station Picker** - Select stations with auto fare lookup
+- **Period Management** - Track multiple TPASS periods
+- **Offline Support** - Works without internet (PWA)
+- **Data Export/Import** - Backup and restore your data
 
-## Expanding the ESLint configuration
+## Supported Transit Systems
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+| System | Auto Fare |
+|--------|-----------|
+| Taipei Metro | Yes |
+| New Taipei Metro (Circular Line) | Yes |
+| Taoyuan Airport MRT | Yes |
+| Danhai LRT | Yes |
+| Ankeng LRT | Yes |
+| TRA (Taiwan Railway) | Yes |
+| Bus | Yes (by segments) |
+| YouBike | Yes (by duration) |
+| Highway Bus | Manual |
+| Ferry | Manual |
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Tech Stack
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- React 18 + TypeScript
+- Vite + Tailwind CSS v4
+- Dexie.js (IndexedDB)
+- React Router v6
+- Recharts
+- vite-plugin-pwa
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Getting Started
+
+```bash
+# Install dependencies
+npm install
+
+# Start dev server
+npm run dev
+
+# Build for production
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Install as App
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. Deploy to Vercel: `npx vercel --prod`
+2. Open the URL on your phone
+3. Tap "Add to Home Screen"
+4. Use offline anytime
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## License
+
+MIT
