@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+/* Enable dark mode based on system preference */
+@variant dark (&:where(.dark, .dark *));
+
+/* TPASS theme colors */
+:root {
+  --color-primary: #3B82F6;
+  --color-success: #10B981;
+  --color-danger: #EF4444;
+  --color-warning: #F59E0B;
+  --color-neutral: #6B7280;
+  --color-background: #F9FAFB;
+}
+
+/* Dark mode colors */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #111827;
+    color-scheme: dark;
+  }
+}
+
+/* Base styles with gradient background */
+body {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-attachment: fixed;
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background-attachment: fixed;
+    color: #F9FAFB;
+  }
+}
+
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Safe area padding for mobile devices */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
