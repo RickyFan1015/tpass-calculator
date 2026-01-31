@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { v4 as uuidv4 } from 'uuid';
+import { LineChart, Line, XAxis, YAxis, ReferenceLine, ResponsiveContainer } from 'recharts';
 import { db } from '../utils/db';
 import { PeriodStatus, type TripRecord, type CommutePreset } from '../types';
 import { Card, CardBody, Button, CircularProgress, TransportIcon, SwipeableItem } from '../components/common';
@@ -67,6 +68,41 @@ export function Home() {
   const savingsPercentage = activePeriod && periodStats
     ? (periodStats.totalAmount / activePeriod.ticketPrice) * 100
     : 0;
+
+  /**
+   * Calculate daily cumulative amounts for the sparkline chart.
+   */
+  const chartData = useMemo(() => {
+    if (!activePeriod || !trips || trips.length === 0) return [];
+
+    const startDate = new Date(activePeriod.startDate);
+    const dailyTotals: Record<number, number> = {};
+
+    // Group trips by day number
+    trips.forEach(trip => {
+      const tripDate = new Date(trip.timestamp);
+      const dayNum = Math.floor((tripDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      if (dayNum >= 1 && dayNum <= 30) {
+        dailyTotals[dayNum] = (dailyTotals[dayNum] || 0) + trip.amount;
+      }
+    });
+
+    // Build cumulative data for 30 days
+    const data: Array<{ day: number; amount: number | null; target: number }> = [];
+    let cumulative = 0;
+    const today = Math.min(periodStats?.daysElapsed || 1, 30);
+
+    for (let day = 1; day <= 30; day++) {
+      if (day <= today) {
+        cumulative += dailyTotals[day] || 0;
+        data.push({ day, amount: cumulative, target: activePeriod.ticketPrice });
+      } else {
+        data.push({ day, amount: null, target: activePeriod.ticketPrice });
+      }
+    }
+
+    return data;
+  }, [activePeriod, trips, periodStats?.daysElapsed]);
 
   /**
    * Quick add a commute trip.
@@ -158,11 +194,50 @@ export function Home() {
             </div>
 
             {/* Period info - compact */}
-            <div className="text-center mb-2">
+            <div className="text-center mb-3">
               <p className="text-xs text-gray-600 dark:text-gray-400">
                 {formatPeriodRange(activePeriod.startDate, activePeriod.endDate)} · {formatCurrency(periodStats.totalAmount)} / {periodStats.tripCount} 趟
               </p>
             </div>
+
+            {/* Sparkline Progress Chart */}
+            {chartData.length > 0 && (
+              <>
+                <div className="h-12 -mx-1">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData} margin={{ top: 2, right: 2, bottom: 2, left: 2 }}>
+                      <defs>
+                        <linearGradient id="belowTarget" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="rgb(201, 122, 122)" stopOpacity={0.15} />
+                          <stop offset="100%" stopColor="rgb(201, 122, 122)" stopOpacity={0.05} />
+                        </linearGradient>
+                        <linearGradient id="aboveTarget" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="rgb(107, 158, 122)" stopOpacity={0.15} />
+                          <stop offset="100%" stopColor="rgb(107, 158, 122)" stopOpacity={0.05} />
+                        </linearGradient>
+                      </defs>
+                      <XAxis dataKey="day" hide />
+                      <YAxis domain={[0, Math.max(activePeriod.ticketPrice * 1.3, periodStats.totalAmount * 1.1)]} hide />
+                      <ReferenceLine y={activePeriod.ticketPrice} stroke="#9ca3af" strokeDasharray="3 3" strokeWidth={1} />
+                      <Line
+                        type="monotone"
+                        dataKey="amount"
+                        stroke={periodStats.savedAmount >= 0 ? '#6b9e7a' : '#c97a7a'}
+                        strokeWidth={2}
+                        dot={false}
+                        connectNulls={false}
+                        fill={periodStats.savedAmount >= 0 ? 'url(#aboveTarget)' : 'url(#belowTarget)'}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-500 mt-1 mb-3">
+                  <span>第 1 天</span>
+                  <span>目標 {formatCurrency(activePeriod.ticketPrice)}</span>
+                  <span>第 30 天</span>
+                </div>
+              </>
+            )}
 
             {/* Day progress bar */}
             <div className="flex items-center justify-between text-xs mb-1">

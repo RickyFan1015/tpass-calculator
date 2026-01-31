@@ -54,8 +54,9 @@ body {
 }
 
 /* Quick action bar positioning above bottom nav with safe area */
+/* Account for the elevated center add button (-mt-8 = 2rem) */
 .quick-action-bottom {
-  bottom: calc(4rem + env(safe-area-inset-bottom, 0px) + 0.5rem);
+  bottom: calc(6rem + env(safe-area-inset-bottom, 0px) + 0.5rem);
 }
 
 /* React DatePicker custom styles */

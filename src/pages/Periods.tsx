@@ -2,12 +2,15 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { v4 as uuidv4 } from 'uuid';
+import DatePicker from 'react-datepicker';
+import { zhTW } from 'date-fns/locale';
+import 'react-datepicker/dist/react-datepicker.css';
 import { db } from '../utils/db';
 import { PeriodStatus, type TPASSPeriod } from '../types';
-import { Card, CardBody, Button, Input, Modal, ConfirmModal } from '../components/common';
+import { Card, CardBody, Button, Modal, ConfirmModal } from '../components/common';
 import { PageHeader } from '../components/common/Layout';
 import { formatCurrency } from '../utils/formatters';
-import { formatPeriodRange, calculateEndDate, getTodayString, getNowString, getDaysElapsed } from '../utils/dateUtils';
+import { formatPeriodRange, calculateEndDate, getNowString, getDaysElapsed } from '../utils/dateUtils';
 import { TPASS_TICKET_PRICE } from '../utils/fareCalculator';
 
 /**
@@ -18,7 +21,7 @@ import { TPASS_TICKET_PRICE } from '../utils/fareCalculator';
 export function Periods() {
   const navigate = useNavigate();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [startDate, setStartDate] = useState(getTodayString());
+  const [startDate, setStartDate] = useState<Date>(new Date());
   const [deletePeriod, setDeletePeriod] = useState<TPASSPeriod | null>(null);
   const [error, setError] = useState('');
 
@@ -51,12 +54,14 @@ export function Periods() {
     }
 
     const now = getNowString();
-    const endDate = calculateEndDate(startDate);
+    // Convert Date to YYYY-MM-DD string
+    const startDateString = startDate.toISOString().split('T')[0];
+    const endDate = calculateEndDate(startDateString);
 
     try {
       await db.periods.add({
         id: uuidv4(),
-        startDate,
+        startDate: startDateString,
         endDate,
         ticketPrice: TPASS_TICKET_PRICE,
         status: PeriodStatus.ACTIVE,
@@ -65,7 +70,7 @@ export function Periods() {
       });
 
       setIsCreateModalOpen(false);
-      setStartDate(getTodayString());
+      setStartDate(new Date());
     } catch (err) {
       setError('建立失敗，請再試一次');
       console.error('Error creating period:', err);
@@ -208,15 +213,22 @@ export function Periods() {
         }
       >
         <div className="space-y-4">
-          <Input
-            label="開始日期"
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            max={getTodayString()}
-          />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              開始日期
+            </label>
+            <DatePicker
+              selected={startDate}
+              onChange={(date: Date | null) => date && setStartDate(date)}
+              dateFormat="yyyy/MM/dd"
+              locale={zhTW}
+              maxDate={new Date()}
+              className="w-full px-3 py-2 border rounded-xl text-gray-900 dark:text-gray-100 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/20 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              wrapperClassName="w-full"
+            />
+          </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            結束日期：{calculateEndDate(startDate)}
+            結束日期：{calculateEndDate(startDate.toISOString().split('T')[0])}
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             票價：{formatCurrency(TPASS_TICKET_PRICE)}
