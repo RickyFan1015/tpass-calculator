@@ -1,4 +1,4 @@
-import { format, differenceInDays, addDays, parseISO, isAfter, isWithinInterval } from 'date-fns';
+import { format, differenceInDays, addDays, parseISO, isAfter } from 'date-fns';
 import { zhTW } from 'date-fns/locale';
 
 /**
@@ -79,22 +79,6 @@ export function getDaysRemaining(endDate: string): number {
 }
 
 /**
- * Check if a date is within a period.
- *
- * @param dateString - Date to check as ISO 8601 string
- * @param startDate - Period start date
- * @param endDate - Period end date
- * @returns True if date is within the period
- */
-export function isDateInPeriod(dateString: string, startDate: string, endDate: string): boolean {
-  const date = parseISO(dateString);
-  const start = parseISO(startDate);
-  const end = parseISO(endDate);
-
-  return isWithinInterval(date, { start, end });
-}
-
-/**
  * Check if a period has ended.
  *
  * @param endDate - Period end date as ISO 8601 string
@@ -108,19 +92,6 @@ export function isPeriodEnded(endDate: string): boolean {
 }
 
 /**
- * Check if a date is in the future.
- *
- * @param dateString - Date to check as ISO 8601 string
- * @returns True if date is in the future
- */
-export function isFutureDate(dateString: string): boolean {
-  const date = parseISO(dateString);
-  const today = new Date();
-  today.setHours(23, 59, 59, 999);
-  return isAfter(date, today);
-}
-
-/**
  * Format a period date range for display.
  *
  * @param startDate - Period start date
@@ -131,22 +102,3 @@ export function formatPeriodRange(startDate: string, endDate: string): string {
   return `${formatDate(startDate)} ~ ${formatDate(endDate)}`;
 }
 
-/**
- * Convert ISO 8601 string to datetime-local input format.
- *
- * @param isoString - ISO 8601 date string
- * @returns String in YYYY-MM-DDTHH:mm format for datetime-local input
- */
-export function toDateTimeLocalString(isoString: string): string {
-  return format(parseISO(isoString), "yyyy-MM-dd'T'HH:mm");
-}
-
-/**
- * Convert datetime-local input value to ISO 8601 string.
- *
- * @param dateTimeLocal - String in YYYY-MM-DDTHH:mm format
- * @returns ISO 8601 date string
- */
-export function fromDateTimeLocalString(dateTimeLocal: string): string {
-  return new Date(dateTimeLocal).toISOString();
-}

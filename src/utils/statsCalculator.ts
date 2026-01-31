@@ -1,8 +1,7 @@
-import { db } from './db';
 import { getDaysElapsed, getDaysRemaining } from './dateUtils';
 import { calculateSavedAmount, TPASS_TICKET_PRICE } from './fareCalculator';
-import type { TPASSPeriod, TripRecord, GlobalStats, PeriodStats } from '../types';
-import { TransportType, PeriodStatus } from '../types';
+import type { TPASSPeriod, TripRecord, PeriodStats } from '../types';
+import { TransportType } from '../types';
 
 /**
  * Calculate statistics for a specific period.
@@ -42,49 +41,6 @@ export function calculatePeriodStats(period: TPASSPeriod, trips: TripRecord[]): 
     dailyAverage,
     transportBreakdown
   };
-}
-
-/**
- * Calculate global statistics from all periods.
- *
- * @returns Promise resolving to global statistics
- */
-export async function calculateGlobalStats(): Promise<GlobalStats> {
-  const periods = await db.periods.toArray();
-  const trips = await db.trips.toArray();
-
-  const totalPeriods = periods.length;
-  const totalTPASSCost = periods.reduce((sum, p) => sum + p.ticketPrice, 0);
-  const totalTripAmount = trips.reduce((sum, t) => sum + t.amount, 0);
-  const totalSavedAmount = totalTripAmount - totalTPASSCost;
-  const totalTripCount = trips.length;
-
-  return {
-    totalPeriods,
-    totalTPASSCost,
-    totalTripAmount,
-    totalSavedAmount,
-    totalTripCount
-  };
-}
-
-/**
- * Get trips for a specific period.
- *
- * @param periodId - The period ID
- * @returns Promise resolving to array of trips
- */
-export async function getTripsByPeriod(periodId: string): Promise<TripRecord[]> {
-  return db.trips.where('periodId').equals(periodId).toArray();
-}
-
-/**
- * Get the active period if any.
- *
- * @returns Promise resolving to active period or undefined
- */
-export async function getActivePeriod(): Promise<TPASSPeriod | undefined> {
-  return db.periods.where('status').equals(PeriodStatus.ACTIVE).first();
 }
 
 /**

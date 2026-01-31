@@ -106,17 +106,6 @@ export interface UserSettings {
 }
 
 /**
- * Global statistics (calculated on demand, not stored).
- */
-export interface GlobalStats {
-  totalPeriods: number;
-  totalTPASSCost: number;
-  totalTripAmount: number;
-  totalSavedAmount: number;
-  totalTripCount: number;
-}
-
-/**
  * Period statistics (calculated on demand).
  */
 export interface PeriodStats {
@@ -144,19 +133,3 @@ export interface TransportTypeInfo {
   color: string;
 }
 
-/**
- * Input for creating a new trip.
- */
-export interface TripInput {
-  transportType: TransportType;
-  departureStation?: string;
-  arrivalStation?: string;
-  routeNumber?: string;
-  segments?: number;
-  duration?: number;
-  city?: YouBikeCity;
-  ferryRoute?: string;
-  amount: number;
-  timestamp?: string;
-  note?: string;
-}

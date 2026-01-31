@@ -6,11 +6,6 @@ import type { YouBikeCity } from '../types';
 export const TPASS_TICKET_PRICE = 1200;
 
 /**
- * Default bus fare per segment.
- */
-export const DEFAULT_BUS_FARE = 15;
-
-/**
  * Calculate YouBike 2.0 fee based on duration and city.
  * Note: Only tracks YouBike 2.0, not YouBike 2.0E (electric assist).
  *
@@ -56,21 +51,8 @@ export function calculateYouBikeFee(minutes: number, city: YouBikeCity): number 
  * @param farePerSegment - Fare per segment (default 15)
  * @returns Total bus fare
  */
-export function calculateBusFare(segments: number, farePerSegment: number = DEFAULT_BUS_FARE): number {
+export function calculateBusFare(segments: number, farePerSegment: number = 15): number {
   return segments * farePerSegment;
-}
-
-/**
- * Calculate TPASS refund amount.
- *
- * @param daysElapsed - Number of days elapsed since start
- * @returns Refund amount (can be negative if no refund available)
- */
-export function calculateRefundAmount(daysElapsed: number): number {
-  // Formula: 1200 - (days × 300) - 20 (handling fee)
-  const deduction = daysElapsed * 300;
-  const handlingFee = 20;
-  return TPASS_TICKET_PRICE - deduction - handlingFee;
 }
 
 /**

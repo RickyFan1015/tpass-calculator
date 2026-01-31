@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
+import DatePicker from 'react-datepicker';
+import { zhTW } from 'date-fns/locale';
+import 'react-datepicker/dist/react-datepicker.css';
 import { Modal, Button, Input, Select } from '../common';
 import { TransportType, type TripRecord, type YouBikeCity } from '../../types';
 import { getAllTransportTypes } from '../../utils/transportTypes';
 import { calculateYouBikeFee, calculateBusFare, isValidAmount, isValidYouBikeDuration, isValidBusSegments } from '../../utils/fareCalculator';
-import { getNowString, toDateTimeLocalString, fromDateTimeLocalString } from '../../utils/dateUtils';
+import { getNowString } from '../../utils/dateUtils';
 import { db } from '../../utils/db';
 
 interface EditTripModalProps {
@@ -25,7 +28,7 @@ export function EditTripModal({ trip, isOpen, onClose }: EditTripModalProps) {
   const [segments, setSegments] = useState('1');
   const [duration, setDuration] = useState('');
   const [city, setCity] = useState<YouBikeCity>('taipei');
-  const [timestamp, setTimestamp] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,7 +42,7 @@ export function EditTripModal({ trip, isOpen, onClose }: EditTripModalProps) {
       setSegments(String(trip.segments || 1));
       setDuration(String(trip.duration || ''));
       setCity(trip.city || 'taipei');
-      setTimestamp(toDateTimeLocalString(trip.timestamp));
+      setSelectedDate(new Date(trip.timestamp));
       setNote(trip.note || '');
       setError('');
     }
@@ -131,7 +134,7 @@ export function EditTripModal({ trip, isOpen, onClose }: EditTripModalProps) {
         duration: transportType === TransportType.YOUBIKE ? parseInt(duration, 10) : undefined,
         city: transportType === TransportType.YOUBIKE ? city : undefined,
         amount: amountNum,
-        timestamp: fromDateTimeLocalString(timestamp),
+        timestamp: selectedDate.toISOString(),
         note: note || undefined,
         updatedAt: getNowString()
       });
@@ -172,12 +175,23 @@ export function EditTripModal({ trip, isOpen, onClose }: EditTripModalProps) {
         />
 
         {/* Date and Time */}
-        <Input
-          label="日期時間"
-          type="datetime-local"
-          value={timestamp}
-          onChange={(e) => setTimestamp(e.target.value)}
-        />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            日期時間
+          </label>
+          <DatePicker
+            selected={selectedDate}
+            onChange={(date: Date | null) => date && setSelectedDate(date)}
+            showTimeSelect
+            timeFormat="HH:mm"
+            timeIntervals={15}
+            dateFormat="yyyy/MM/dd HH:mm"
+            locale={zhTW}
+            maxDate={new Date()}
+            className="w-full px-3 py-2 border rounded-xl text-gray-900 dark:text-gray-100 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/20 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            wrapperClassName="w-full"
+          />
+        </div>
 
         {/* Bus specific inputs */}
         {transportType === TransportType.BUS && (
