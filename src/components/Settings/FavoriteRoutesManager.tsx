@@ -3,9 +3,16 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../../utils/db';
 import { Card, CardBody, Button, Input, Select, Modal, ConfirmModal, TransportIcon } from '../common';
+import { StationPicker, type Station } from '../Trip/StationPicker';
 import { TransportType, type FavoriteRoute } from '../../types';
 import { getAllTransportTypes, TRANSPORT_TYPE_INFO } from '../../utils/transportTypes';
 import { formatCurrency } from '../../utils/formatters';
+import { getMetroFare } from '../../data/fares/taipei-metro-fares';
+import { getTaoyuanMetroFare } from '../../data/fares/taoyuan-metro-fares';
+import { getNewTaipeiMetroFare } from '../../data/fares/new-taipei-metro-fares';
+import { getDanhaiLRTFare } from '../../data/fares/danhai-lrt-fares';
+import { getAnkengLRTFare } from '../../data/fares/ankeng-lrt-fares';
+import { getTRAFare } from '../../data/fares/tra-fares';
 
 /**
  * Component for managing favorite routes in settings.
@@ -26,6 +33,10 @@ export function FavoriteRoutesManager() {
   const [defaultAmount, setDefaultAmount] = useState('');
   const [error, setError] = useState('');
 
+  // Station picker state
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerTarget, setPickerTarget] = useState<'departure' | 'arrival'>('departure');
+
   const favorites = useLiveQuery(
     () => db.favoriteRoutes.orderBy('sortOrder').toArray()
   );
@@ -34,6 +45,68 @@ export function FavoriteRoutesManager() {
     value: info.type,
     label: info.label
   }));
+
+  /**
+   * Calculate fare based on transport type and stations.
+   */
+  const calculateFare = (type: TransportType, from: string, to: string): number => {
+    switch (type) {
+      case TransportType.TAIPEI_METRO:
+        return getMetroFare(from, to);
+      case TransportType.TAOYUAN_METRO:
+        return getTaoyuanMetroFare(from, to);
+      case TransportType.NEW_TAIPEI_METRO:
+        return getNewTaipeiMetroFare(from, to);
+      case TransportType.DANHAI_LRT:
+        return getDanhaiLRTFare(from, to);
+      case TransportType.ANKENG_LRT:
+        return getAnkengLRTFare(from, to);
+      case TransportType.TRA:
+        return getTRAFare(from, to);
+      default:
+        return 0;
+    }
+  };
+
+  const openStationPicker = (target: 'departure' | 'arrival') => {
+    setPickerTarget(target);
+    setPickerOpen(true);
+  };
+
+  const handleStationSelect = (station: Station) => {
+    if (pickerTarget === 'departure') {
+      setDepartureStation(station.name);
+      if (arrivalStation) {
+        const fare = calculateFare(transportType, station.name, arrivalStation);
+        if (fare > 0) setDefaultAmount(String(fare));
+      }
+    } else {
+      setArrivalStation(station.name);
+      if (departureStation) {
+        const fare = calculateFare(transportType, departureStation, station.name);
+        if (fare > 0) setDefaultAmount(String(fare));
+      }
+    }
+  };
+
+  const metroTypes: TransportType[] = [
+    TransportType.TAIPEI_METRO,
+    TransportType.NEW_TAIPEI_METRO,
+    TransportType.TAOYUAN_METRO,
+    TransportType.DANHAI_LRT,
+    TransportType.ANKENG_LRT,
+    TransportType.TRA
+  ];
+
+  const handleTransportChange = (type: TransportType) => {
+    setTransportType(type);
+    // Clear stations when transport type changes
+    if (metroTypes.includes(type)) {
+      setDepartureStation('');
+      setArrivalStation('');
+      setDefaultAmount('');
+    }
+  };
 
   const resetForm = () => {
     setName('');
@@ -114,14 +187,6 @@ export function FavoriteRoutesManager() {
     }
   };
 
-  const metroTypes: TransportType[] = [
-    TransportType.TAIPEI_METRO,
-    TransportType.NEW_TAIPEI_METRO,
-    TransportType.TAOYUAN_METRO,
-    TransportType.DANHAI_LRT,
-    TransportType.ANKENG_LRT,
-    TransportType.TRA
-  ];
   const isMetroType = metroTypes.includes(transportType);
 
   const busTypes: TransportType[] = [TransportType.BUS, TransportType.HIGHWAY_BUS];
@@ -139,24 +204,34 @@ export function FavoriteRoutesManager() {
       <Select
         label="交通工具"
         value={transportType}
-        onChange={(e) => setTransportType(e.target.value as TransportType)}
+        onChange={(e) => handleTransportChange(e.target.value as TransportType)}
         options={transportOptions}
       />
 
       {isMetroType && (
         <>
-          <Input
-            label="起站"
-            value={departureStation}
-            onChange={(e) => setDepartureStation(e.target.value)}
-            placeholder="例如：台北車站"
-          />
-          <Input
-            label="迄站"
-            value={arrivalStation}
-            onChange={(e) => setArrivalStation(e.target.value)}
-            placeholder="例如：台北101"
-          />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">起站</label>
+            <button
+              onClick={() => openStationPicker('departure')}
+              className={`w-full px-3 py-2 border rounded-xl text-left bg-white/70 dark:bg-gray-800/70 ${
+                departureStation ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400'
+              } border-white/20 dark:border-white/10`}
+            >
+              {departureStation || '選擇車站...'}
+            </button>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">迄站</label>
+            <button
+              onClick={() => openStationPicker('arrival')}
+              className={`w-full px-3 py-2 border rounded-xl text-left bg-white/70 dark:bg-gray-800/70 ${
+                arrivalStation ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400'
+              } border-white/20 dark:border-white/10`}
+            >
+              {arrivalStation || '選擇車站...'}
+            </button>
+          </div>
         </>
       )}
 
@@ -288,6 +363,15 @@ export function FavoriteRoutesManager() {
         message={`確定要刪除「${deleteRoute?.name}」嗎？`}
         confirmText="刪除"
         variant="danger"
+      />
+
+      {/* Station Picker */}
+      <StationPicker
+        isOpen={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onSelect={handleStationSelect}
+        transportType={transportType}
+        title={pickerTarget === 'departure' ? '選擇起站' : '選擇迄站'}
       />
     </div>
   );

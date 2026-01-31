@@ -2,6 +2,8 @@
 
 A Progressive Web App (PWA) for tracking your TPASS transit card savings in Taiwan.
 
+**Live Demo:** https://tpass-calculator.vercel.app/
+
 ## What is TPASS?
 
 TPASS is Taiwan's monthly transit pass (NT$1,200/month) that provides unlimited rides on metro, bus, and other public transportation. This app helps you track whether you're getting your money's worth.
@@ -38,6 +40,7 @@ TPASS is Taiwan's monthly transit pass (NT$1,200/month) that provides unlimited 
 - Dexie.js (IndexedDB)
 - React Router v6
 - Recharts
+- react-datepicker
 - vite-plugin-pwa
 
 ## Getting Started
@@ -55,9 +58,9 @@ npm run build
 
 ## Install as App
 
-1. Deploy to Vercel: `npx vercel --prod`
-2. Open the URL on your phone
-3. Tap "Add to Home Screen"
+1. Open https://tpass-calculator.vercel.app/ on your phone
+2. **iOS Safari**: Tap Share → "Add to Home Screen"
+3. **Android Chrome**: Tap Menu → "Install App"
 4. Use offline anytime
 
 ## License
