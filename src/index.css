@@ -52,3 +52,8 @@ body {
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom);
 }
+
+/* Quick action bar positioning above bottom nav with safe area */
+.quick-action-bottom {
+  bottom: calc(4rem + env(safe-area-inset-bottom, 0px) + 0.5rem);
+}

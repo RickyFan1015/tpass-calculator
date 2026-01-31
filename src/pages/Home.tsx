@@ -53,7 +53,7 @@ export function Home() {
   );
 
   const recentTrips = useLiveQuery(
-    () => db.trips.orderBy('timestamp').reverse().limit(3).toArray()
+    () => db.trips.orderBy('timestamp').reverse().limit(5).toArray()
   );
 
   const commutePresets = useLiveQuery(
@@ -244,7 +244,7 @@ export function Home() {
 
       {/* Fixed Quick Action Bar - above BottomNav */}
       {activePeriod && (
-        <div className="fixed bottom-20 left-0 right-0 px-3 pb-2">
+        <div className="fixed quick-action-bottom left-0 right-0 px-3">
           {commutePresets && commutePresets.length > 0 ? (
             <div className="flex gap-2">
               {commutePresets.slice(0, 2).map((preset, index) => {

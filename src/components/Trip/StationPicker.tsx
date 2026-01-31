@@ -165,7 +165,7 @@ export function StationPicker({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title={title} size="full">
+    <Modal isOpen={isOpen} onClose={handleClose} title={title} size="full" zIndex={60}>
       <div className="space-y-4 h-full flex flex-col">
         {/* Search Input */}
         <div className="flex-shrink-0">

@@ -8,6 +8,7 @@ interface ModalProps {
   children: ReactNode;
   footer?: ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  zIndex?: number;
 }
 
 const sizeStyles = {
@@ -15,7 +16,7 @@ const sizeStyles = {
   md: 'max-w-md',
   lg: 'max-w-lg',
   xl: 'max-w-xl',
-  full: 'max-w-lg h-[85vh]'
+  full: 'max-w-full sm:max-w-lg h-[80vh] sm:h-[85vh]'
 };
 
 /**
@@ -30,7 +31,8 @@ export function Modal({
   title,
   children,
   footer,
-  size = 'md'
+  size = 'md',
+  zIndex = 50
 }: ModalProps) {
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Escape') {
@@ -52,8 +54,10 @@ export function Modal({
 
   if (!isOpen) return null;
 
+  const isFullSize = size === 'full';
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className={`fixed inset-0 flex ${isFullSize ? 'items-center' : 'items-end sm:items-center'} justify-center`} style={{ zIndex }}>
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
@@ -63,7 +67,7 @@ export function Modal({
 
       {/* Modal content */}
       <div
-        className={`relative w-full ${sizeStyles[size]} mx-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-white/10 shadow-xl transform transition-all ${size === 'full' ? 'flex flex-col' : ''}`}
+        className={`relative w-full ${sizeStyles[size]} ${isFullSize ? 'mx-2 sm:mx-4' : 'sm:mx-4'} bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl ${isFullSize ? 'rounded-2xl' : 'rounded-t-2xl sm:rounded-2xl'} border border-white/20 dark:border-white/10 shadow-xl transform transition-all ${isFullSize ? '' : 'safe-area-bottom'} ${isFullSize ? 'flex flex-col' : ''}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? 'modal-title' : undefined}
