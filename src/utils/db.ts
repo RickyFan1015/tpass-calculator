@@ -1,14 +1,13 @@
 import Dexie, { type Table } from 'dexie';
-import type { TPASSPeriod, TripRecord, FavoriteRoute, UserSettings, CommutePreset } from '../types';
+import type { TPASSPeriod, TripRecord, UserSettings, CommutePreset } from '../types';
 
 /**
  * TPASS Calculator IndexedDB database using Dexie.js.
- * Provides local storage for periods, trips, favorite routes, and settings.
+ * Provides local storage for periods, trips, and settings.
  */
 export class TPASSDatabase extends Dexie {
   periods!: Table<TPASSPeriod>;
   trips!: Table<TripRecord>;
-  favoriteRoutes!: Table<FavoriteRoute>;
   settings!: Table<UserSettings>;
   commutePresets!: Table<CommutePreset>;
 
@@ -26,6 +25,15 @@ export class TPASSDatabase extends Dexie {
       periods: 'id, startDate, endDate, status',
       trips: 'id, periodId, transportType, timestamp, [periodId+transportType], [periodId+timestamp]',
       favoriteRoutes: 'id, sortOrder',
+      settings: 'id',
+      commutePresets: 'id, sortOrder'
+    });
+
+    // Version 3: Remove favoriteRoutes (replaced by commutePresets)
+    this.version(3).stores({
+      periods: 'id, startDate, endDate, status',
+      trips: 'id, periodId, transportType, timestamp, [periodId+transportType], [periodId+timestamp]',
+      favoriteRoutes: null,  // Delete this table
       settings: 'id',
       commutePresets: 'id, sortOrder'
     });

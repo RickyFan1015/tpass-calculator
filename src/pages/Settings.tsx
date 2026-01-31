@@ -3,7 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../utils/db';
 import { Card, CardBody, Button, Input, ConfirmModal } from '../components/common';
 import { PageHeader } from '../components/common/Layout';
-import { CommutePresetsManager, FavoriteRoutesManager } from '../components/Settings';
+import { CommutePresetsManager } from '../components/Settings';
 import { getNowString } from '../utils/dateUtils';
 import type { TPASSPeriod, TripRecord, CommutePreset } from '../types';
 
@@ -162,9 +162,6 @@ export function Settings() {
         {/* Commute Presets */}
         <CommutePresetsManager />
 
-        {/* Favorite Routes */}
-        <FavoriteRoutesManager />
-
         {/* Default Bus Fare */}
         <Card>
           <CardBody>
@@ -240,7 +237,7 @@ export function Settings() {
         <Card>
           <CardBody>
             <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">關於</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">TPASS 省錢計算機 v1.1.1</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">TPASS 省錢計算機 v1.2.0</p>
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
               追蹤你的 TPASS 省錢金額
             </p>

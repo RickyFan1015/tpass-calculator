@@ -66,20 +66,6 @@ export interface TripRecord {
 }
 
 /**
- * Favorite route for quick trip recording.
- */
-export interface FavoriteRoute {
-  id: string;
-  name: string;               // User-defined name
-  transportType: TransportType;
-  departureStation?: string;
-  arrivalStation?: string;
-  routeNumber?: string;
-  defaultAmount?: number;
-  sortOrder: number;
-}
-
-/**
  * Commute preset for quick one-tap recording on Home page.
  */
 export interface CommutePreset {

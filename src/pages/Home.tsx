@@ -246,8 +246,8 @@ export function Home() {
       {activePeriod && (
         <div className="fixed quick-action-bottom left-0 right-0 px-3">
           {commutePresets && commutePresets.length > 0 ? (
-            <div className="flex gap-2">
-              {commutePresets.slice(0, 2).map((preset, index) => {
+            <div className="grid grid-cols-2 gap-2">
+              {commutePresets.slice(0, 4).map((preset, index) => {
                 const colors = BUTTON_COLORS[index % BUTTON_COLORS.length];
                 const typeInfo = getTransportTypeInfo(preset.transportType);
                 return (
@@ -255,15 +255,15 @@ export function Home() {
                     key={preset.id}
                     onClick={() => handleQuickAdd(preset)}
                     disabled={isQuickAdding !== null}
-                    className={`flex-1 py-3 px-3 bg-gradient-to-r ${colors.from} ${colors.to} rounded-xl shadow-lg ${colors.shadow} flex flex-col items-center justify-center gap-0.5 ${colors.hoverFrom} ${colors.hoverTo} transition-all active:scale-[0.97] disabled:opacity-50`}
+                    className={`py-2.5 px-2 bg-gradient-to-r ${colors.from} ${colors.to} rounded-xl shadow-lg ${colors.shadow} flex flex-col items-center justify-center gap-0.5 ${colors.hoverFrom} ${colors.hoverTo} transition-all active:scale-[0.97] disabled:opacity-50`}
                   >
-                    <div className="flex items-center gap-1.5">
-                      <TransportIcon iconType={typeInfo.iconType} size={20} color="white" />
-                      <span className="text-base font-bold text-white">
+                    <div className="flex items-center gap-1">
+                      <TransportIcon iconType={typeInfo.iconType} size={16} color="white" />
+                      <span className="text-sm font-bold text-white">
                         {isQuickAdding === preset.id ? '...' : preset.name}
                       </span>
                     </div>
-                    <span className="text-[10px] text-white/70">
+                    <span className="text-[9px] text-white/70 truncate max-w-full">
                       {preset.departureStation}→{preset.arrivalStation} ${preset.amount}
                     </span>
                   </button>

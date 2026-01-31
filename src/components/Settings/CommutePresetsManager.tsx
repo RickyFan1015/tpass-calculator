@@ -194,9 +194,15 @@ export function CommutePresetsManager() {
       <div className="flex items-center justify-between mb-3">
         <div>
           <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">快速通勤按鈕</h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400">顯示在首頁的快速記帳按鈕</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">顯示在首頁的快速記帳按鈕（最多 4 組）</p>
         </div>
-        <Button size="sm" onClick={openAddModal}>+ 新增</Button>
+        <Button
+          size="sm"
+          onClick={openAddModal}
+          disabled={presets && presets.length >= 4}
+        >
+          + 新增
+        </Button>
       </div>
 
       {!presets || presets.length === 0 ? (
