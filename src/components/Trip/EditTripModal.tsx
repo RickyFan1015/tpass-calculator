@@ -5,7 +5,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { Modal, Button, Input, Select } from '../common';
 import { TransportType, type TripRecord, type YouBikeCity } from '../../types';
 import { getAllTransportTypes } from '../../utils/transportTypes';
-import { calculateYouBikeFee, calculateBusFare, isValidAmount, isValidYouBikeDuration, isValidBusSegments } from '../../utils/fareCalculator';
+import { calculateYouBikeFee, calculateBusFare, isValidAmount, isValidYouBikeAmount, isValidYouBikeDuration, isValidBusSegments } from '../../utils/fareCalculator';
 import { getNowString } from '../../utils/dateUtils';
 import { db } from '../../utils/db';
 
@@ -102,13 +102,15 @@ export function EditTripModal({ trip, isOpen, onClose }: EditTripModalProps) {
 
     setError('');
     const amountNum = parseFloat(amount);
+    const isYouBike = transportType === TransportType.YOUBIKE;
+    const isAmountValid = isYouBike ? isValidYouBikeAmount(amountNum) : isValidAmount(amountNum);
 
-    if (!isValidAmount(amountNum)) {
-      setError('金額必須介於 1 至 10,000 元之間');
+    if (!isAmountValid) {
+      setError(isYouBike ? '金額必須介於 0 至 10,000 元之間' : '金額必須介於 1 至 10,000 元之間');
       return;
     }
 
-    if (transportType === TransportType.YOUBIKE) {
+    if (isYouBike) {
       const durationNum = parseInt(duration, 10);
       if (!isValidYouBikeDuration(durationNum)) {
         setError('騎乘時間必須介於 1 至 1,440 分鐘之間');

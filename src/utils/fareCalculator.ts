@@ -77,6 +77,16 @@ export function isValidAmount(amount: number): boolean {
 }
 
 /**
+ * Validate YouBike amount (allows 0 for free ride promotions).
+ *
+ * @param amount - Amount to validate
+ * @returns True if amount is valid (0 <= amount <= 10000)
+ */
+export function isValidYouBikeAmount(amount: number): boolean {
+  return amount >= 0 && amount <= 10000;
+}
+
+/**
  * Validate YouBike duration.
  *
  * @param duration - Duration in minutes

@@ -61,7 +61,7 @@ export function PeriodDetail() {
         <div className="p-4">
           <Card>
             <CardBody className="text-center py-8">
-              <p className="text-gray-500">找不到此週期</p>
+              <p className="text-gray-500 dark:text-gray-400">找不到此週期</p>
               <Button className="mt-4" onClick={() => navigate('/periods')}>
                 返回週期列表
               </Button>
@@ -85,13 +85,13 @@ export function PeriodDetail() {
           <CardBody>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-500">已使用金額</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm text-gray-500 dark:text-gray-400">已使用金額</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                   {formatCurrency(stats.totalAmount)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   {stats.savedAmount >= 0 ? '省下' : '虧損'}
                 </p>
                 <p className={`text-2xl font-bold ${
@@ -101,12 +101,12 @@ export function PeriodDetail() {
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">搭乘次數</p>
-                <p className="text-xl font-semibold text-gray-900">{stats.tripCount}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">搭乘次數</p>
+                <p className="text-xl font-semibold text-gray-900 dark:text-gray-100">{stats.tripCount}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">每日平均</p>
-                <p className="text-xl font-semibold text-gray-900">
+                <p className="text-sm text-gray-500 dark:text-gray-400">每日平均</p>
+                <p className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                   {formatCurrency(Math.round(stats.dailyAverage))}
                 </p>
               </div>
@@ -118,7 +118,7 @@ export function PeriodDetail() {
         {chartData.length > 0 && (
           <Card>
             <CardBody>
-              <h3 className="text-sm font-medium text-gray-700 mb-4">依交通類型</h3>
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">依交通類型</h3>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -147,7 +147,7 @@ export function PeriodDetail() {
         {/* Transport Breakdown List */}
         <Card>
           <CardBody>
-            <h3 className="text-sm font-medium text-gray-700 mb-3">明細</h3>
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">明細</h3>
             <div className="space-y-2">
               {chartData.map(item => (
                 <div
@@ -159,15 +159,15 @@ export function PeriodDetail() {
                     <span className="text-sm text-gray-700 dark:text-gray-300">{item.name}</span>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-semibold text-gray-900">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                       {formatCurrency(item.value)}
                     </p>
-                    <p className="text-xs text-gray-500">{item.count} 趟</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{item.count} 趟</p>
                   </div>
                 </div>
               ))}
               {chartData.length === 0 && (
-                <p className="text-sm text-gray-500 text-center py-4">尚無紀錄</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">尚無紀錄</p>
               )}
             </div>
           </CardBody>
@@ -177,7 +177,7 @@ export function PeriodDetail() {
         {trips && trips.length > 0 && (
           <Card>
             <CardBody>
-              <h3 className="text-sm font-medium text-gray-700 mb-3">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                 最近紀錄（共 {trips.length} 筆）
               </h3>
               <div className="space-y-2 max-h-64 overflow-y-auto">
@@ -194,14 +194,14 @@ export function PeriodDetail() {
                         <div className="flex items-center gap-2">
                           <TransportIcon iconType={info.iconType} size={20} color={info.color} />
                           <div>
-                            <p className="text-sm text-gray-900">
+                            <p className="text-sm text-gray-900 dark:text-gray-100">
                               {trip.departureStation && trip.arrivalStation
                                 ? `${trip.departureStation} → ${trip.arrivalStation}`
                                 : trip.routeNumber
                                   ? `路線 ${trip.routeNumber}`
                                   : info.label}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
                               {formatDate(trip.timestamp)}
                             </p>
                           </div>
@@ -212,7 +212,7 @@ export function PeriodDetail() {
                   })}
               </div>
               {trips.length > 10 && (
-                <p className="text-xs text-gray-500 text-center mt-2">
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
                   顯示 10 筆，共 {trips.length} 筆
                 </p>
               )}

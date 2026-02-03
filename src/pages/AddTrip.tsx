@@ -8,7 +8,7 @@ import { Button, Card, CardBody, Input, Select, TransportIcon } from '../compone
 import { PageHeader } from '../components/common/Layout';
 import { StationPicker, type Station } from '../components/Trip/StationPicker';
 import { getAllTransportTypes } from '../utils/transportTypes';
-import { calculateYouBikeFee, calculateBusFare, isValidAmount, isValidYouBikeDuration, isValidBusSegments } from '../utils/fareCalculator';
+import { calculateYouBikeFee, calculateBusFare, isValidAmount, isValidYouBikeAmount, isValidYouBikeDuration, isValidBusSegments } from '../utils/fareCalculator';
 import { getMetroFare } from '../data/fares/taipei-metro-fares';
 import { getTaoyuanMetroFare } from '../data/fares/taoyuan-metro-fares';
 import { getNewTaipeiMetroFare } from '../data/fares/new-taipei-metro-fares';
@@ -223,12 +223,14 @@ export function AddTrip() {
     }
 
     const amountNum = parseFloat(amount);
-    if (!isValidAmount(amountNum)) {
-      setError('金額必須介於 1 至 10,000 元之間');
+    const isYouBike = transportType === TransportType.YOUBIKE;
+    const isAmountValid = isYouBike ? isValidYouBikeAmount(amountNum) : isValidAmount(amountNum);
+    if (!isAmountValid) {
+      setError(isYouBike ? '金額必須介於 0 至 10,000 元之間' : '金額必須介於 1 至 10,000 元之間');
       return;
     }
 
-    if (transportType === TransportType.YOUBIKE) {
+    if (isYouBike) {
       const durationNum = parseInt(duration, 10);
       if (!isValidYouBikeDuration(durationNum)) {
         setError('騎乘時間必須介於 1 至 1,440 分鐘之間');

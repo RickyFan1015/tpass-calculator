@@ -3,7 +3,7 @@
 React + TypeScript + Tailwind PWA for tracking TPASS transit savings.
 
 **Live:** https://tpass-calculator.vercel.app/
-**Version:** v1.2.0
+**Version:** v1.2.1
 
 ## Tech Stack
 - Vite + React 18 + TypeScript
@@ -61,7 +61,7 @@ src/
 | TRA (Taiwan Railway) | Yes | Yes |
 | Bus | No | Yes (by segments) |
 | Highway Bus | No | Manual |
-| YouBike | No | Yes (by duration + city) |
+| YouBike | No | Yes (by duration + city, allows $0 for free promotions) |
 | Ferry | No | Manual |
 
 ## UI Design
