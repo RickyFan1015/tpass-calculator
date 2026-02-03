@@ -3,14 +3,14 @@
 React + TypeScript + Tailwind PWA for tracking TPASS transit savings.
 
 **Live:** https://tpass-calculator.vercel.app/
-**Version:** v1.2.1
+**Version:** v1.2.2
 
 ## Tech Stack
 - Vite + React 18 + TypeScript
 - Tailwind CSS v4 (via @tailwindcss/vite)
 - Dexie.js (IndexedDB) + dexie-react-hooks
 - React Router v6
-- Recharts (charts)
+- Recharts (PeriodDetail pie chart)
 - react-datepicker
 - vite-plugin-pwa
 
@@ -78,6 +78,7 @@ src/
 ### Home Page
 - Compact layout optimized for iPhone 15 Pro Max (430x932)
 - Circular progress with animated fill effect
+- Transport distribution bar (shows usage breakdown by transport type)
 - Quick commute buttons (2x2 grid, max 4) fixed above bottom nav
 - Recent trips (5 items) with swipe gestures (right=copy, left=delete)
 - Period info with animated day progress bar
@@ -89,6 +90,7 @@ src/
 - 2x2 grid layout with gradient colors
 
 ### Add Trip
+- Grouped transport type selector (5 main + 2 expandable groups)
 - Auto-fill last used stations for each transport type
 - Swap button to reverse departure/arrival stations
 - Auto fare calculation when both stations selected
@@ -133,6 +135,8 @@ src/
 - [x] Mobile-optimized layout (iPhone 15 Pro Max)
 - [x] Data backup/restore (JSON export/import)
 - [x] Deployed to Vercel
+- [x] Grouped transport type selector with expandable groups
+- [x] Transport distribution bar on home page
 
 ## TODO (Optional)
 - [ ] Refund calculator

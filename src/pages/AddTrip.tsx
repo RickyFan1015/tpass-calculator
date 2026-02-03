@@ -7,7 +7,7 @@ import { TransportType, PeriodStatus, type YouBikeCity } from '../types';
 import { Button, Card, CardBody, Input, Select, TransportIcon } from '../components/common';
 import { PageHeader } from '../components/common/Layout';
 import { StationPicker, type Station } from '../components/Trip/StationPicker';
-import { getAllTransportTypes } from '../utils/transportTypes';
+import { TRANSPORT_TYPE_INFO } from '../utils/transportTypes';
 import { calculateYouBikeFee, calculateBusFare, isValidAmount, isValidYouBikeAmount, isValidYouBikeDuration, isValidBusSegments } from '../utils/fareCalculator';
 import { getMetroFare } from '../data/fares/taipei-metro-fares';
 import { getTaoyuanMetroFare } from '../data/fares/taoyuan-metro-fares';
@@ -16,6 +16,29 @@ import { getDanhaiLRTFare } from '../data/fares/danhai-lrt-fares';
 import { getAnkengLRTFare } from '../data/fares/ankeng-lrt-fares';
 import { getTRAFare } from '../data/fares/tra-fares';
 import { getNowString } from '../utils/dateUtils';
+
+// Main transport types shown in first row
+const MAIN_TRANSPORT_TYPES: TransportType[] = [
+  TransportType.TAOYUAN_METRO,
+  TransportType.TAIPEI_METRO,
+  TransportType.NEW_TAIPEI_METRO,
+  TransportType.TRA,
+  TransportType.YOUBIKE
+];
+
+// Grouped transport types
+const BUS_GROUP_TYPES: TransportType[] = [
+  TransportType.BUS,
+  TransportType.HIGHWAY_BUS
+];
+
+const OTHER_GROUP_TYPES: TransportType[] = [
+  TransportType.DANHAI_LRT,
+  TransportType.ANKENG_LRT,
+  TransportType.FERRY
+];
+
+type TransportGroup = 'bus' | 'other' | null;
 
 // Transport types that need station input
 const STATION_BASED_TYPES: TransportType[] = [
@@ -60,6 +83,9 @@ export function AddTrip() {
   // Station picker state
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerTarget, setPickerTarget] = useState<'departure' | 'arrival'>('departure');
+
+  // Transport group expansion state
+  const [expandedGroup, setExpandedGroup] = useState<TransportGroup>(null);
 
   const activePeriod = useLiveQuery(
     () => db.periods.where('status').equals(PeriodStatus.ACTIVE).first()
@@ -118,17 +144,59 @@ export function AddTrip() {
   const isStationBased = STATION_BASED_TYPES.includes(transportType);
   const hasStationPicker = PICKER_SUPPORTED_TYPES.includes(transportType);
 
+  /**
+   * Handle transport type selection.
+   *
+   * @param type - Selected transport type
+   */
   const handleTransportChange = (type: TransportType) => {
     setTransportType(type);
     setAmount('');
     setDepartureStation('');
     setArrivalStation('');
     setError('');
+    // Collapse group when a type is selected
+    setExpandedGroup(null);
 
     // Auto-calculate for bus
     if (type === TransportType.BUS) {
       setAmount(String(calculateBusFare(1)));
     }
+  };
+
+  /**
+   * Toggle transport group expansion.
+   *
+   * @param group - Group to toggle ('bus' or 'other')
+   */
+  const handleGroupToggle = (group: TransportGroup) => {
+    setExpandedGroup(prev => prev === group ? null : group);
+  };
+
+  /**
+   * Check if a transport type is currently selected.
+   *
+   * @param type - Transport type to check
+   * @returns True if selected
+   */
+  const isTypeSelected = (type: TransportType): boolean => {
+    return transportType === type;
+  };
+
+  /**
+   * Check if any type in a group is currently selected.
+   *
+   * @param group - Group to check ('bus' or 'other')
+   * @returns True if any type in group is selected
+   */
+  const isGroupActive = (group: TransportGroup): boolean => {
+    if (group === 'bus') {
+      return BUS_GROUP_TYPES.includes(transportType);
+    }
+    if (group === 'other') {
+      return OTHER_GROUP_TYPES.includes(transportType);
+    }
+    return false;
   };
 
   const handleSegmentsChange = (value: string) => {
@@ -311,29 +379,176 @@ export function AddTrip() {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               交通工具
             </label>
-            <div className="grid grid-cols-5 gap-2">
-              {getAllTransportTypes().map(info => (
-                <button
-                  key={info.type}
-                  onClick={() => handleTransportChange(info.type)}
-                  className={`flex flex-col items-center justify-center p-2 rounded-xl border-2 transition-all ${
-                    transportType === info.type
-                      ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 shadow-md'
-                      : 'border-white/20 dark:border-white/10 hover:border-indigo-300 dark:hover:border-indigo-500/50 bg-white/50 dark:bg-gray-800/50'
+
+            {/* Main transport types - first row */}
+            <div className="grid grid-cols-5 gap-2 mb-2">
+              {MAIN_TRANSPORT_TYPES.map(type => {
+                const info = TRANSPORT_TYPE_INFO[type];
+                const selected = isTypeSelected(type);
+                return (
+                  <button
+                    key={type}
+                    onClick={() => handleTransportChange(type)}
+                    className={`flex flex-col items-center justify-center p-2 rounded-xl border-2 transition-all ${
+                      selected
+                        ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 shadow-md'
+                        : 'border-white/20 dark:border-white/10 hover:border-indigo-300 dark:hover:border-indigo-500/50 bg-white/50 dark:bg-gray-800/50'
+                    }`}
+                  >
+                    <TransportIcon
+                      iconType={info.iconType}
+                      size={24}
+                      color={selected ? info.color : '#9CA3AF'}
+                    />
+                    <span className={`text-xs mt-1 truncate w-full text-center ${
+                      selected ? 'text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-500 dark:text-gray-400'
+                    }`}>
+                      {info.label.replace('台北捷運', '北捷').replace('新北捷運', '環狀線').replace('桃園機捷', '機捷')}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Group buttons - second row */}
+            <div className="flex gap-2">
+              {/* Bus/Highway Bus group */}
+              <button
+                onClick={() => handleGroupToggle('bus')}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-full border-2 transition-all ${
+                  isGroupActive('bus') || expandedGroup === 'bus'
+                    ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30'
+                    : 'border-white/20 dark:border-white/10 hover:border-indigo-300 dark:hover:border-indigo-500/50 bg-white/50 dark:bg-gray-800/50'
+                }`}
+              >
+                <TransportIcon
+                  iconType="bus"
+                  size={18}
+                  color={isGroupActive('bus') || expandedGroup === 'bus' ? TRANSPORT_TYPE_INFO[TransportType.BUS].color : '#9CA3AF'}
+                />
+                <span className={`text-xs ${
+                  isGroupActive('bus') || expandedGroup === 'bus' ? 'text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-500 dark:text-gray-400'
+                }`}>
+                  公車/客運
+                </span>
+                <svg
+                  className={`w-3 h-3 transition-transform ${expandedGroup === 'bus' ? 'rotate-180' : ''} ${
+                    isGroupActive('bus') || expandedGroup === 'bus' ? 'text-indigo-500' : 'text-gray-400'
                   }`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
-                  <TransportIcon
-                    iconType={info.iconType}
-                    size={24}
-                    color={transportType === info.type ? info.color : '#9CA3AF'}
-                  />
-                  <span className={`text-xs mt-1 truncate w-full text-center ${
-                    transportType === info.type ? 'text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-500 dark:text-gray-400'
-                  }`}>
-                    {info.label.split(' ')[0]}
-                  </span>
-                </button>
-              ))}
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {/* Other group */}
+              <button
+                onClick={() => handleGroupToggle('other')}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-full border-2 transition-all ${
+                  isGroupActive('other') || expandedGroup === 'other'
+                    ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30'
+                    : 'border-white/20 dark:border-white/10 hover:border-indigo-300 dark:hover:border-indigo-500/50 bg-white/50 dark:bg-gray-800/50'
+                }`}
+              >
+                <TransportIcon
+                  iconType="lightRail"
+                  size={18}
+                  color={isGroupActive('other') || expandedGroup === 'other' ? TRANSPORT_TYPE_INFO[TransportType.DANHAI_LRT].color : '#9CA3AF'}
+                />
+                <span className={`text-xs ${
+                  isGroupActive('other') || expandedGroup === 'other' ? 'text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-500 dark:text-gray-400'
+                }`}>
+                  其他
+                </span>
+                <svg
+                  className={`w-3 h-3 transition-transform ${expandedGroup === 'other' ? 'rotate-180' : ''} ${
+                    isGroupActive('other') || expandedGroup === 'other' ? 'text-indigo-500' : 'text-gray-400'
+                  }`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Expanded bus group */}
+            <div
+              className={`grid transition-all duration-300 ease-out overflow-hidden ${
+                expandedGroup === 'bus' ? 'grid-rows-[1fr] mt-2' : 'grid-rows-[0fr]'
+              }`}
+            >
+              <div className="overflow-hidden">
+                <div className="flex gap-2">
+                  {BUS_GROUP_TYPES.map(type => {
+                    const info = TRANSPORT_TYPE_INFO[type];
+                    const selected = isTypeSelected(type);
+                    return (
+                      <button
+                        key={type}
+                        onClick={() => handleTransportChange(type)}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl border-2 transition-all ${
+                          selected
+                            ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 shadow-md'
+                            : 'border-white/20 dark:border-white/10 hover:border-indigo-300 dark:hover:border-indigo-500/50 bg-white/50 dark:bg-gray-800/50'
+                        }`}
+                      >
+                        <TransportIcon
+                          iconType={info.iconType}
+                          size={20}
+                          color={selected ? info.color : '#9CA3AF'}
+                        />
+                        <span className={`text-sm ${
+                          selected ? 'text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-500 dark:text-gray-400'
+                        }`}>
+                          {info.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Expanded other group */}
+            <div
+              className={`grid transition-all duration-300 ease-out overflow-hidden ${
+                expandedGroup === 'other' ? 'grid-rows-[1fr] mt-2' : 'grid-rows-[0fr]'
+              }`}
+            >
+              <div className="overflow-hidden">
+                <div className="flex gap-2">
+                  {OTHER_GROUP_TYPES.map(type => {
+                    const info = TRANSPORT_TYPE_INFO[type];
+                    const selected = isTypeSelected(type);
+                    return (
+                      <button
+                        key={type}
+                        onClick={() => handleTransportChange(type)}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl border-2 transition-all ${
+                          selected
+                            ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 shadow-md'
+                            : 'border-white/20 dark:border-white/10 hover:border-indigo-300 dark:hover:border-indigo-500/50 bg-white/50 dark:bg-gray-800/50'
+                        }`}
+                      >
+                        <TransportIcon
+                          iconType={info.iconType}
+                          size={20}
+                          color={selected ? info.color : '#9CA3AF'}
+                        />
+                        <span className={`text-sm ${
+                          selected ? 'text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-500 dark:text-gray-400'
+                        }`}>
+                          {info.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </CardBody>
         </Card>
