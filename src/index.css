@@ -59,6 +59,22 @@ body {
   bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
 }
 
+/* Toast fade-in animation */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
 /* React DatePicker custom styles */
 .react-datepicker {
   font-family: inherit;

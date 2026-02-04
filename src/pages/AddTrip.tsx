@@ -1,10 +1,10 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../utils/db';
 import { TransportType, PeriodStatus, type YouBikeCity } from '../types';
-import { Button, Card, CardBody, Input, Select, TransportIcon } from '../components/common';
+import { Button, Card, CardBody, Input, Select, TransportIcon, Toast, CheckIcon } from '../components/common';
 import { PageHeader } from '../components/common/Layout';
 import { StationPicker, type Station } from '../components/Trip/StationPicker';
 import { TRANSPORT_TYPE_INFO } from '../utils/transportTypes';
@@ -79,6 +79,21 @@ export function AddTrip() {
   const [note, setNote] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Stable callback for toast close
+  const handleToastClose = useCallback(() => setToast(null), []);
 
   // Station picker state
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -118,6 +133,35 @@ export function AddTrip() {
     return stations;
   }, [recentTrips]);
 
+  const isStationBased = STATION_BASED_TYPES.includes(transportType);
+  const hasStationPicker = PICKER_SUPPORTED_TYPES.includes(transportType);
+
+  /**
+   * Calculate fare based on transport type and stations.
+   *
+   * @param from - Departure station name
+   * @param to - Arrival station name
+   * @returns Calculated fare amount
+   */
+  const calculateFare = useCallback((from: string, to: string): number => {
+    switch (transportType) {
+      case TransportType.TAIPEI_METRO:
+        return getMetroFare(from, to);
+      case TransportType.TAOYUAN_METRO:
+        return getTaoyuanMetroFare(from, to);
+      case TransportType.NEW_TAIPEI_METRO:
+        return getNewTaipeiMetroFare(from, to);
+      case TransportType.DANHAI_LRT:
+        return getDanhaiLRTFare(from, to);
+      case TransportType.ANKENG_LRT:
+        return getAnkengLRTFare(from, to);
+      case TransportType.TRA:
+        return getTRAFare(from, to);
+      default:
+        return 0;
+    }
+  }, [transportType]);
+
   // Auto-fill last used stations when transport type changes
   useEffect(() => {
     if (recentTrips && recentTrips.length > 0 && isStationBased) {
@@ -132,7 +176,7 @@ export function AddTrip() {
         }
       }
     }
-  }, [recentTrips, transportType]);
+  }, [recentTrips, isStationBased, hasStationPicker, calculateFare]);
 
   const cityOptions = [
     { value: 'taipei', label: '台北市' },
@@ -140,9 +184,6 @@ export function AddTrip() {
     { value: 'taoyuan', label: '桃園市' },
     { value: 'keelung', label: '基隆市' }
   ];
-
-  const isStationBased = STATION_BASED_TYPES.includes(transportType);
-  const hasStationPicker = PICKER_SUPPORTED_TYPES.includes(transportType);
 
   /**
    * Handle transport type selection.
@@ -242,28 +283,6 @@ export function AddTrip() {
     }
   };
 
-  /**
-   * Calculate fare based on transport type and stations.
-   */
-  const calculateFare = (from: string, to: string): number => {
-    switch (transportType) {
-      case TransportType.TAIPEI_METRO:
-        return getMetroFare(from, to);
-      case TransportType.TAOYUAN_METRO:
-        return getTaoyuanMetroFare(from, to);
-      case TransportType.NEW_TAIPEI_METRO:
-        return getNewTaipeiMetroFare(from, to);
-      case TransportType.DANHAI_LRT:
-        return getDanhaiLRTFare(from, to);
-      case TransportType.ANKENG_LRT:
-        return getAnkengLRTFare(from, to);
-      case TransportType.TRA:
-        return getTRAFare(from, to);
-      default:
-        return 0;
-    }
-  };
-
   const handleStationSelect = (station: Station) => {
     if (pickerTarget === 'departure') {
       setDepartureStation(station.name);
@@ -282,6 +301,9 @@ export function AddTrip() {
     }
   };
 
+  /**
+   * Handle form submission with haptic feedback and success animation.
+   */
   const handleSubmit = async () => {
     setError('');
 
@@ -319,6 +341,11 @@ export function AddTrip() {
       return;
     }
 
+    // Immediate haptic feedback
+    if ('vibrate' in navigator) {
+      navigator.vibrate(50);
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -341,10 +368,21 @@ export function AddTrip() {
         updatedAt: now
       });
 
-      navigate('/');
+      // Success feedback
+      setIsSuccess(true);
+      setToast('已儲存紀錄');
+
+      // Navigate after brief success animation
+      successTimeoutRef.current = setTimeout(() => {
+        navigate('/');
+      }, 600);
     } catch (err) {
       setError('儲存失敗，請再試一次');
       console.error('Error saving trip:', err);
+      // Error haptic feedback
+      if ('vibrate' in navigator) {
+        navigator.vibrate([100, 50, 100]);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -723,15 +761,26 @@ export function AddTrip() {
         </Card>
 
         {/* Submit Button */}
-        <Button
-          fullWidth
-          size="lg"
+        <button
           onClick={handleSubmit}
-          disabled={isSubmitting || !amount}
+          disabled={isSubmitting || isSuccess || !amount}
+          className={`w-full py-3 px-4 rounded-xl font-medium text-white transition-all duration-200 disabled:opacity-50 ${
+            isSuccess
+              ? 'bg-gradient-to-r from-green-500 to-emerald-600 scale-105'
+              : 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 active:scale-[0.98]'
+          }`}
         >
-          {isSubmitting ? '儲存中...' : '儲存紀錄'}
-        </Button>
+          {isSuccess ? (
+            <span className="flex items-center justify-center gap-2">
+              <CheckIcon size={20} color="white" />
+              已儲存
+            </span>
+          ) : isSubmitting ? '儲存中...' : '儲存紀錄'}
+        </button>
       </div>
+
+      {/* Toast notification */}
+      <Toast message={toast} onClose={handleToastClose} />
 
       {/* Station Picker Modal */}
       <StationPicker

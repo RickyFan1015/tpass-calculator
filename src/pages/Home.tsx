@@ -1,9 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../utils/db';
 import { PeriodStatus, type TripRecord, type CommutePreset } from '../types';
-import { Card, CardBody, Button, CircularProgress, TransportIcon, SwipeableItem } from '../components/common';
+import { Card, CardBody, Button, CircularProgress, TransportIcon, SwipeableItem, Toast, CheckIcon } from '../components/common';
 import { formatCurrency, formatSavedAmount } from '../utils/formatters';
 import { formatPeriodRange, formatDateTime, getNowString } from '../utils/dateUtils';
 import { calculatePeriodStats, getAmountToBreakEven } from '../utils/statsCalculator';
@@ -40,6 +40,21 @@ const BUTTON_COLORS = [
 export function Home() {
   const navigate = useNavigate();
   const [isQuickAdding, setIsQuickAdding] = useState<string | null>(null);
+  const [successId, setSuccessId] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Stable callback for toast close
+  const handleToastClose = useCallback(() => setToast(null), []);
 
   const activePeriod = useLiveQuery(
     () => db.periods.where('status').equals(PeriodStatus.ACTIVE).first()
@@ -95,12 +110,18 @@ export function Home() {
   }, [periodStats]);
 
   /**
-   * Quick add a commute trip.
+   * Quick add a commute trip with haptic feedback and visual confirmation.
+   * Includes cooldown to prevent accidental duplicate entries.
    *
    * @param preset - Commute preset to add
    */
   const handleQuickAdd = async (preset: CommutePreset) => {
-    if (!activePeriod) return;
+    if (!activePeriod || isQuickAdding || successId) return;
+
+    // Immediate haptic feedback
+    if ('vibrate' in navigator) {
+      navigator.vibrate(50);
+    }
 
     setIsQuickAdding(preset.id);
     const now = getNowString();
@@ -117,8 +138,23 @@ export function Home() {
         createdAt: now,
         updatedAt: now
       });
+
+      // Success feedback
+      setSuccessId(preset.id);
+      setToast(`已記錄 ${preset.name}`);
+
+      // Clear previous timeout if exists
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current);
+      }
+      // Clear success state after animation (800ms)
+      successTimeoutRef.current = setTimeout(() => setSuccessId(null), 800);
     } catch (err) {
       console.error('Error adding quick trip:', err);
+      // Error haptic feedback (double vibration)
+      if ('vibrate' in navigator) {
+        navigator.vibrate([100, 50, 100]);
+      }
     } finally {
       setIsQuickAdding(null);
     }
@@ -151,6 +187,9 @@ export function Home() {
 
   return (
     <div className="p-3 space-y-3 pb-32">
+      {/* Toast notification */}
+      <Toast message={toast} onClose={handleToastClose} />
+
       {/* Compact Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-bold text-white">TPASS 省錢計算機</h1>
@@ -310,17 +349,26 @@ export function Home() {
               {commutePresets.slice(0, 4).map((preset, index) => {
                 const colors = BUTTON_COLORS[index % BUTTON_COLORS.length];
                 const typeInfo = getTransportTypeInfo(preset.transportType);
+                const isSuccess = successId === preset.id;
                 return (
                   <button
                     key={preset.id}
                     onClick={() => handleQuickAdd(preset)}
-                    disabled={isQuickAdding !== null}
-                    className={`py-2.5 px-2 bg-gradient-to-r ${colors.from} ${colors.to} rounded-xl shadow-lg ${colors.shadow} flex flex-col items-center justify-center gap-0.5 ${colors.hoverFrom} ${colors.hoverTo} transition-all active:scale-[0.97] disabled:opacity-50`}
+                    disabled={isQuickAdding !== null || successId !== null}
+                    className={`py-2.5 px-2 bg-gradient-to-r rounded-xl shadow-lg flex flex-col items-center justify-center gap-0.5 transition-all duration-200 active:scale-[0.97] disabled:opacity-50 ${
+                      isSuccess
+                        ? 'from-green-500 to-emerald-600 scale-105 shadow-green-500/40'
+                        : `${colors.from} ${colors.to} ${colors.shadow} ${colors.hoverFrom} ${colors.hoverTo}`
+                    }`}
                   >
                     <div className="flex items-center gap-1">
-                      <TransportIcon iconType={typeInfo.iconType} size={16} color="white" />
+                      {isSuccess ? (
+                        <CheckIcon size={16} color="white" />
+                      ) : (
+                        <TransportIcon iconType={typeInfo.iconType} size={16} color="white" />
+                      )}
                       <span className="text-sm font-bold text-white">
-                        {isQuickAdding === preset.id ? '...' : preset.name}
+                        {isQuickAdding === preset.id ? '...' : isSuccess ? '已記錄' : preset.name}
                       </span>
                     </div>
                     <span className="text-[9px] text-white/70 truncate max-w-full">

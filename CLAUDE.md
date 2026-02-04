@@ -3,7 +3,7 @@
 React + TypeScript + Tailwind PWA for tracking TPASS transit savings.
 
 **Live:** https://tpass-calculator.vercel.app/
-**Version:** v1.2.2
+**Version:** v1.3.1
 
 ## Tech Stack
 - Vite + React 18 + TypeScript
@@ -25,7 +25,7 @@ npm run preview  # Preview production build
 ```
 src/
 ├── components/
-│   ├── common/       # Button, Card, Input, Modal, Layout, BottomNav, CircularProgress, TransportIcons, SwipeableItem
+│   ├── common/       # Button, Card, Icons, Input, Modal, Layout, BottomNav, CircularProgress, TransportIcons, SwipeableItem, Toast
 │   ├── Trip/         # EditTripModal, StationPicker
 │   └── Settings/     # CommutePresetsManager
 ├── data/
@@ -137,6 +137,7 @@ src/
 - [x] Deployed to Vercel
 - [x] Grouped transport type selector with expandable groups
 - [x] Transport distribution bar on home page
+- [x] Quick button haptic feedback, success animation & toast notification
 
 ## TODO (Optional)
 - [ ] Refund calculator
