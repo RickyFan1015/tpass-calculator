@@ -3,7 +3,7 @@
 React + TypeScript + Tailwind PWA for tracking TPASS transit savings.
 
 **Live:** https://tpass-calculator.vercel.app/
-**Version:** v1.3.1
+**Version:** v1.3.2
 
 ## Tech Stack
 - Vite + React 18 + TypeScript
