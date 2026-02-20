@@ -36,7 +36,8 @@ export const TAOYUAN_METRO_STATIONS: TaoyuanMetroStation[] = [
   { code: 'A18', name: '高鐵桃園站', nameEn: 'HSR Taoyuan', line: 'A', isExpress: true },
   { code: 'A19', name: '桃園體育園區', nameEn: 'Taoyuan Sports Park', line: 'A' },
   { code: 'A20', name: '興南', nameEn: 'Xingnan', line: 'A' },
-  { code: 'A21', name: '環北', nameEn: 'Huanbei', line: 'A', isExpress: true }
+  { code: 'A21', name: '環北', nameEn: 'Huanbei', line: 'A', isExpress: true },
+  { code: 'A22', name: '老街溪', nameEn: 'Laojie Creek', line: 'A' }
 ];
 
 /**

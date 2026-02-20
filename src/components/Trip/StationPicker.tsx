@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Modal, Input } from '../common';
 import { TransportType } from '../../types';
 import {
@@ -133,6 +133,21 @@ export function StationPicker({
     () => getStationData(transportType),
     [transportType]
   );
+
+  /**
+   * Auto-select the line when there is only one line available.
+   * This avoids requiring an extra tap for single-line systems (e.g. Taoyuan Metro).
+   * Re-triggers on modal open to handle consecutive uses of the same transport type.
+   */
+  useEffect(() => {
+    if (!isOpen) return;
+    const lineKeys = Object.keys(lines);
+    if (lineKeys.length === 1) {
+      setSelectedLine(lineKeys[0]);
+    } else {
+      setSelectedLine(null);
+    }
+  }, [isOpen, lines]);
 
   const filteredStations = useMemo(() => {
     if (searchQuery) {
