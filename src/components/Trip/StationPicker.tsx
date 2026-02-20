@@ -134,6 +134,12 @@ export function StationPicker({
     [transportType]
   );
 
+  /** Whether this transport type has only one line (e.g. Taoyuan Metro, Ankeng LRT). */
+  const isSingleLine = useMemo(
+    () => Object.keys(lines).length === 1,
+    [lines]
+  );
+
   /**
    * Auto-select the line when there is only one line available.
    * This avoids requiring an extra tap for single-line systems (e.g. Taoyuan Metro).
@@ -182,18 +188,20 @@ export function StationPicker({
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title={title} size="full" zIndex={60}>
       <div className="space-y-4 h-full flex flex-col">
-        {/* Search Input */}
-        <div className="flex-shrink-0">
-          <Input
-            placeholder="搜尋車站..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setSelectedLine(null);
-            }}
-            autoFocus
-          />
-        </div>
+        {/* Search Input - hidden for single-line systems where all stations are already visible */}
+        {!isSingleLine && (
+          <div className="flex-shrink-0">
+            <Input
+              placeholder="搜尋車站..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setSelectedLine(null);
+              }}
+              autoFocus
+            />
+          </div>
+        )}
 
         {/* Recent Stations */}
         {!searchQuery && !selectedLine && recentStationsList.length > 0 && (
@@ -213,8 +221,8 @@ export function StationPicker({
           </div>
         )}
 
-        {/* Line Selection */}
-        {!searchQuery && (
+        {/* Line Selection - hidden for single-line systems (auto-selected via useEffect) */}
+        {!isSingleLine && !searchQuery && (
           <div className="flex-shrink-0">
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">依路線選擇</h3>
             <div className="grid grid-cols-2 gap-2">
