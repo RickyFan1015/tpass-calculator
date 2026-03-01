@@ -5,6 +5,8 @@ import { Card, CardBody, Button, Input, ConfirmModal } from '../components/commo
 import { PageHeader } from '../components/common/Layout';
 import { CommutePresetsManager } from '../components/Settings';
 import { getNowString } from '../utils/dateUtils';
+import { getMetroFare } from '../data/fares/taipei-metro-fares';
+import { TransportType } from '../types';
 import type { TPASSPeriod, TripRecord, CommutePreset } from '../types';
 
 interface BackupData {
@@ -26,6 +28,8 @@ export function Settings() {
   const [importError, setImportError] = useState('');
   const [importSuccess, setImportSuccess] = useState('');
   const [defaultBusFare, setDefaultBusFare] = useState<string>('');
+  const [recalcResult, setRecalcResult] = useState('');
+  const [isRecalculating, setIsRecalculating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const settings = useLiveQuery(() => db.settings.get('default'));
@@ -45,6 +49,63 @@ export function Settings() {
       defaultBusFare: fare,
       updatedAt: getNowString()
     });
+  };
+
+  /**
+   * Recalculate all Taipei Metro trip fares using the updated fare matrix.
+   * Only updates trips where the recalculated fare differs from the stored amount.
+   */
+  const handleRecalcMetroFares = async () => {
+    if (isRecalculating) return;
+    setIsRecalculating(true);
+    setRecalcResult('');
+
+    try {
+      const metroTrips = await db.trips
+        .where('transportType')
+        .equals(TransportType.TAIPEI_METRO)
+        .toArray();
+
+      const eligibleTrips = metroTrips.filter(
+        (t) => t.departureStation && t.arrivalStation
+      );
+
+      if (eligibleTrips.length === 0) {
+        setRecalcResult('沒有找到台北捷運紀錄');
+        return;
+      }
+
+      const now = getNowString();
+      const updates: { id: string; changes: { amount: number; updatedAt: string } }[] = [];
+
+      for (const trip of eligibleTrips) {
+        const newFare = getMetroFare(trip.departureStation!, trip.arrivalStation!);
+        if (newFare > 0 && newFare !== trip.amount) {
+          updates.push({ id: trip.id!, changes: { amount: newFare, updatedAt: now } });
+        }
+      }
+
+      if (updates.length > 0) {
+        await db.transaction('rw', db.trips, async () => {
+          for (const { id, changes } of updates) {
+            await db.trips.update(id, changes);
+          }
+        });
+      }
+
+      if (updates.length === 0) {
+        setRecalcResult(`${eligibleTrips.length} 筆紀錄已是最新票價，無需修正`);
+      } else {
+        setRecalcResult(
+          `已修正 ${updates.length} 筆（共 ${eligibleTrips.length} 筆台北捷運紀錄）`
+        );
+      }
+    } catch (err) {
+      console.error('Recalculate metro fares error:', err);
+      setRecalcResult('修正過程發生錯誤，所有變更已回滾，請再試一次');
+    } finally {
+      setIsRecalculating(false);
+    }
   };
 
   const handleResetData = async () => {
@@ -190,6 +251,21 @@ export function Settings() {
           <CardBody>
             <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">資料管理</h3>
             <div className="space-y-3">
+              <Button
+                variant="secondary"
+                fullWidth
+                onClick={handleRecalcMetroFares}
+                disabled={isRecalculating}
+              >
+                {isRecalculating ? '修正中...' : '修正台北捷運票價'}
+              </Button>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                使用最新官方票價重新計算所有台北捷運紀錄
+              </p>
+              {recalcResult && (
+                <p className="text-sm text-blue-600 dark:text-blue-400 text-center">{recalcResult}</p>
+              )}
+
               <Button
                 variant="secondary"
                 fullWidth
