@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Modal, Input } from '../common';
 import { TransportType } from '../../types';
+import { useGeolocation } from '../../hooks/useGeolocation';
+import { findNearbyStations, formatDistance } from '../../utils/geoUtils';
 import {
   TAIPEI_METRO_STATIONS,
   TAIPEI_METRO_LINES,
@@ -172,6 +174,39 @@ export function StationPicker({
       .slice(0, 2);
   }, [recentStations, stations]);
 
+  // GPS nearby stations
+  const geo = useGeolocation(isOpen);
+
+  /** Station lookup map by code for O(1) access. */
+  const stationByCode = useMemo(
+    () => new Map(stations.map(s => [s.code, s])),
+    [stations]
+  );
+
+  /** All station codes for the current transport type. */
+  const stationCodes = useMemo(() => stations.map(s => s.code), [stations]);
+
+  /** Nearby stations with distance, computed from GPS position. */
+  const nearbyStations = useMemo(() => {
+    if (!geo.latitude || !geo.longitude) return [];
+    return findNearbyStations(geo.latitude, geo.longitude, stationCodes);
+  }, [geo.latitude, geo.longitude, stationCodes]);
+
+  /** Nearby station objects resolved from station data. */
+  const nearbyStationsList = useMemo(() => {
+    return nearbyStations
+      .map(ns => {
+        const station = stationByCode.get(ns.code);
+        return station ? { station, distance: ns.distance } : null;
+      })
+      .filter((item): item is { station: Station; distance: number } => item !== null);
+  }, [nearbyStations, stationByCode]);
+
+  /**
+   * Handle station selection: notify parent, reset local state, and close the modal.
+   *
+   * @param station - The selected station object
+   */
   const handleSelect = (station: Station) => {
     onSelect(station);
     setSearchQuery('');
@@ -179,6 +214,9 @@ export function StationPicker({
     onClose();
   };
 
+  /**
+   * Handle modal close: reset search query and selected line, then close.
+   */
   const handleClose = () => {
     setSearchQuery('');
     setSelectedLine(null);
@@ -218,6 +256,36 @@ export function StationPicker({
                 </button>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Nearby Stations (GPS) - show when not searching and before line selection */}
+        {!searchQuery && (!selectedLine || isSingleLine) && (geo.loading || nearbyStationsList.length > 0) && (
+          <div className="flex-shrink-0">
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">附近車站</h3>
+            {geo.loading ? (
+              <div className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500 py-1" role="status" aria-label="Locating nearby stations">
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                定位中...
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {nearbyStationsList.map(({ station, distance }) => (
+                  <button
+                    key={station.code}
+                    onClick={() => handleSelect(station)}
+                    aria-label={`${station.name}, ${formatDistance(distance)}`}
+                    className="px-3 py-1.5 text-sm bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 rounded-full transition-colors flex items-center gap-1.5"
+                  >
+                    <span>{station.code} {station.name}</span>
+                    <span className="text-xs text-emerald-500 dark:text-emerald-400">{formatDistance(distance)}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
