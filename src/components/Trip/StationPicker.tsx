@@ -203,8 +203,8 @@ export function StationPicker({
           </div>
         )}
 
-        {/* Recent Stations */}
-        {!searchQuery && !selectedLine && recentStationsList.length > 0 && (
+        {/* Recent Stations - show for multi-line (before line selection) and single-line systems */}
+        {!searchQuery && (!selectedLine || isSingleLine) && recentStationsList.length > 0 && (
           <div className="flex-shrink-0">
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">最近選擇</h3>
             <div className="flex flex-wrap gap-2">

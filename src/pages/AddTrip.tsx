@@ -106,14 +106,16 @@ export function AddTrip() {
     () => db.periods.where('status').equals(PeriodStatus.ACTIVE).first()
   );
 
-  // Query recent trips for current transport type to get recent stations
+  // Query recent trips for current transport type to get recent stations.
+  // Must sort by timestamp (not primary key) since IDs are random UUIDs.
   const recentTrips = useLiveQuery(
-    () => db.trips
-      .where('transportType')
-      .equals(transportType)
-      .reverse()
-      .limit(10)
-      .toArray(),
+    async () => {
+      const trips = await db.trips
+        .where('transportType')
+        .equals(transportType)
+        .sortBy('timestamp');
+      return trips.reverse().slice(0, 10);
+    },
     [transportType]
   );
 

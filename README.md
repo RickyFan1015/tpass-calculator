@@ -4,6 +4,10 @@ A Progressive Web App (PWA) for tracking your TPASS transit card savings in Taiw
 
 **Live Demo:** https://tpass-calculator.vercel.app/
 
+<p align="center">
+  <img src="docs/screenshot.png" alt="TPASS Calculator Screenshot" width="280" />
+</p>
+
 ## What is TPASS?
 
 TPASS is Taiwan's monthly transit pass (NT$1,200/month) that provides unlimited rides on metro, bus, and other public transportation. This app helps you track whether you're getting your money's worth.
