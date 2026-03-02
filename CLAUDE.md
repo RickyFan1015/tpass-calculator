@@ -3,7 +3,7 @@
 React + TypeScript + Tailwind PWA for tracking TPASS transit savings.
 
 **Live:** https://tpass-calculator.vercel.app/
-**Version:** v1.3.5
+**Version:** v1.4.0
 
 ## Tech Stack
 - Vite + React 18 + TypeScript
@@ -29,12 +29,12 @@ src/
 │   ├── Trip/         # EditTripModal, StationPicker
 │   └── Settings/     # CommutePresetsManager
 ├── data/
-│   ├── stations/     # Taipei Metro, Taoyuan Metro, New Taipei Metro, Danhai LRT, Ankeng LRT, TRA
+│   ├── stations/     # Taipei Metro, Taoyuan Metro, New Taipei Metro, Danhai LRT, Ankeng LRT, TRA, station-coordinates
 │   └── fares/        # Fare matrices for all supported transit systems
-├── hooks/            # usePeriodCheck
+├── hooks/            # usePeriodCheck, useGeolocation
 ├── pages/            # Home, AddTrip, TripHistory, Periods, PeriodDetail, Settings
 ├── types/            # TypeScript interfaces (use const object, not enum)
-└── utils/            # db, dateUtils, fareCalculator, formatters, statsCalculator, transportTypes
+└── utils/            # db, dateUtils, fareCalculator, formatters, statsCalculator, transportTypes, geoUtils
 ```
 
 ## Key Conventions
@@ -95,6 +95,7 @@ src/
 - Swap button to reverse departure/arrival stations
 - Auto fare calculation when both stations selected
 - Full-height station picker modal (80vh)
+- GPS nearby station recommendations (green pills with distance)
 
 ### Trip History
 - Group trips by date
@@ -138,6 +139,7 @@ src/
 - [x] Grouped transport type selector with expandable groups
 - [x] Transport distribution bar on home page
 - [x] Quick button haptic feedback, success animation & toast notification
+- [x] GPS nearby station recommendations in StationPicker
 
 ## TODO (Optional)
 - [ ] Refund calculator
