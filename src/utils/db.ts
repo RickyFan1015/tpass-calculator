@@ -37,6 +37,27 @@ export class TPASSDatabase extends Dexie {
       settings: 'id',
       commutePresets: 'id, sortOrder'
     });
+
+    // Version 4: Merge danhai_lrt and ankeng_lrt into new_taipei_metro
+    this.version(4).stores({
+      periods: 'id, startDate, endDate, status',
+      trips: 'id, periodId, transportType, timestamp, [periodId+transportType], [periodId+timestamp]',
+      settings: 'id',
+      commutePresets: 'id, sortOrder'
+    }).upgrade(tx => {
+      return Promise.all([
+        tx.table('trips').toCollection().modify(trip => {
+          if (trip.transportType === 'danhai_lrt' || trip.transportType === 'ankeng_lrt') {
+            trip.transportType = 'new_taipei_metro';
+          }
+        }),
+        tx.table('commutePresets').toCollection().modify(preset => {
+          if (preset.transportType === 'danhai_lrt' || preset.transportType === 'ankeng_lrt') {
+            preset.transportType = 'new_taipei_metro';
+          }
+        })
+      ]);
+    });
   }
 }
 

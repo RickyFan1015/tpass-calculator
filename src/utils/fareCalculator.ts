@@ -1,4 +1,8 @@
-import type { YouBikeCity } from '../types';
+import { TransportType, type YouBikeCity } from '../types';
+import { getMetroFare } from '../data/fares/taipei-metro-fares';
+import { getTaoyuanMetroFare } from '../data/fares/taoyuan-metro-fares';
+import { getNewTaipeiMetroFare, isNewTaipeiCrossLine } from '../data/fares/new-taipei-metro-fares';
+import { getTRAFare } from '../data/fares/tra-fares';
 
 /**
  * Default TPASS ticket price.
@@ -64,6 +68,45 @@ export function calculateBusFare(segments: number, farePerSegment: number = 15):
  */
 export function calculateSavedAmount(totalTripAmount: number, ticketPrice: number = TPASS_TICKET_PRICE): number {
   return totalTripAmount - ticketPrice;
+}
+
+/**
+ * Calculate fare between two stations based on transport type.
+ *
+ * @param transportType - The transit system type
+ * @param from - Departure station name
+ * @param to - Arrival station name
+ * @returns Fare in TWD, or 0 if unknown type or stations not found
+ */
+export function calculateStationFare(transportType: TransportType, from: string, to: string): number {
+  switch (transportType) {
+    case TransportType.TAIPEI_METRO:
+      return getMetroFare(from, to);
+    case TransportType.TAOYUAN_METRO:
+      return getTaoyuanMetroFare(from, to);
+    case TransportType.NEW_TAIPEI_METRO:
+      return getNewTaipeiMetroFare(from, to);
+    case TransportType.TRA:
+      return getTRAFare(from, to);
+    default:
+      return 0;
+  }
+}
+
+/**
+ * Check if a station-based trip involves a cross-line selection that should be blocked.
+ * Currently only New Taipei Metro has multiple lines that cannot share a single fare.
+ *
+ * @param transportType - The transit system type
+ * @param from - Departure station name
+ * @param to - Arrival station name
+ * @returns True if the selection is cross-line and should be blocked
+ */
+export function isCrossLineBlocked(transportType: TransportType, from: string, to: string): boolean {
+  if (transportType === TransportType.NEW_TAIPEI_METRO) {
+    return isNewTaipeiCrossLine(from, to);
+  }
+  return false;
 }
 
 /**

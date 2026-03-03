@@ -22,18 +22,6 @@ export const TRANSPORT_TYPE_INFO: Record<TransportType, TransportTypeInfo> = {
     iconType: 'airportExpress',
     color: '#8246AF'
   },
-  [TransportType.DANHAI_LRT]: {
-    type: TransportType.DANHAI_LRT,
-    label: '淡海輕軌',
-    iconType: 'lightRail',
-    color: '#00A3E0'
-  },
-  [TransportType.ANKENG_LRT]: {
-    type: TransportType.ANKENG_LRT,
-    label: '安坑輕軌',
-    iconType: 'lightRail',
-    color: '#80CC28'
-  },
   [TransportType.TRA]: {
     type: TransportType.TRA,
     label: '台鐵',
@@ -66,14 +54,23 @@ export const TRANSPORT_TYPE_INFO: Record<TransportType, TransportTypeInfo> = {
   }
 };
 
+/** Fallback info for unmigrated or unknown transport types. */
+const FALLBACK_INFO: TransportTypeInfo = {
+  type: TransportType.NEW_TAIPEI_METRO,
+  label: '新北捷運',
+  iconType: 'metro',
+  color: '#FFCC00'
+};
+
 /**
  * Get transport type info by type.
+ * Returns fallback for unknown types (e.g. un-migrated legacy data).
  *
  * @param type - Transport type
  * @returns Transport type info
  */
 export function getTransportTypeInfo(type: TransportType): TransportTypeInfo {
-  return TRANSPORT_TYPE_INFO[type];
+  return TRANSPORT_TYPE_INFO[type] ?? FALLBACK_INFO;
 }
 
 /**
@@ -91,8 +88,6 @@ export function getAllTransportTypes(): TransportTypeInfo[] {
     TransportType.TRA,
     TransportType.BUS,
     TransportType.HIGHWAY_BUS,
-    TransportType.DANHAI_LRT,
-    TransportType.ANKENG_LRT,
     TransportType.FERRY
   ];
   return order.map(type => TRANSPORT_TYPE_INFO[type]);

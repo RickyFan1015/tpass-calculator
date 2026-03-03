@@ -5,24 +5,16 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { Modal, Button, Input, Select } from '../common';
 import { TransportType, type TripRecord, type YouBikeCity } from '../../types';
 import { getAllTransportTypes } from '../../utils/transportTypes';
-import { calculateYouBikeFee, calculateBusFare, isValidAmount, isValidYouBikeAmount, isValidYouBikeDuration, isValidBusSegments } from '../../utils/fareCalculator';
+import { calculateYouBikeFee, calculateBusFare, calculateStationFare, isCrossLineBlocked, isValidAmount, isValidYouBikeAmount, isValidYouBikeDuration, isValidBusSegments } from '../../utils/fareCalculator';
 import { getNowString } from '../../utils/dateUtils';
 import { db } from '../../utils/db';
 import { StationPicker, type Station } from './StationPicker';
-import { getMetroFare } from '../../data/fares/taipei-metro-fares';
-import { getTaoyuanMetroFare } from '../../data/fares/taoyuan-metro-fares';
-import { getNewTaipeiMetroFare } from '../../data/fares/new-taipei-metro-fares';
-import { getDanhaiLRTFare } from '../../data/fares/danhai-lrt-fares';
-import { getAnkengLRTFare } from '../../data/fares/ankeng-lrt-fares';
-import { getTRAFare } from '../../data/fares/tra-fares';
 
 /** Transport types that require station selection. */
 const STATION_BASED_TYPES: TransportType[] = [
   TransportType.TAIPEI_METRO,
   TransportType.NEW_TAIPEI_METRO,
   TransportType.TAOYUAN_METRO,
-  TransportType.DANHAI_LRT,
-  TransportType.ANKENG_LRT,
   TransportType.TRA
 ];
 
@@ -66,22 +58,7 @@ export function EditTripModal({ trip, isOpen, onClose }: EditTripModalProps) {
    * @returns Calculated fare amount
    */
   const calculateFare = useCallback((from: string, to: string): number => {
-    switch (transportType) {
-      case TransportType.TAIPEI_METRO:
-        return getMetroFare(from, to);
-      case TransportType.TAOYUAN_METRO:
-        return getTaoyuanMetroFare(from, to);
-      case TransportType.NEW_TAIPEI_METRO:
-        return getNewTaipeiMetroFare(from, to);
-      case TransportType.DANHAI_LRT:
-        return getDanhaiLRTFare(from, to);
-      case TransportType.ANKENG_LRT:
-        return getAnkengLRTFare(from, to);
-      case TransportType.TRA:
-        return getTRAFare(from, to);
-      default:
-        return 0;
-    }
+    return calculateStationFare(transportType, from, to);
   }, [transportType]);
 
   // Initialize form with trip data when modal opens
@@ -192,14 +169,26 @@ export function EditTripModal({ trip, isOpen, onClose }: EditTripModalProps) {
     if (pickerTarget === 'departure') {
       setDepartureStation(station.name);
       if (arrivalStation) {
-        const fare = calculateFare(station.name, arrivalStation);
-        if (fare > 0) setAmount(String(fare));
+        if (isCrossLineBlocked(transportType, station.name, arrivalStation)) {
+          setAmount('');
+          setError('不同路線無法直接搭乘，請分開記錄各線段');
+        } else {
+          setError('');
+          const fare = calculateFare(station.name, arrivalStation);
+          if (fare > 0) setAmount(String(fare));
+        }
       }
     } else {
       setArrivalStation(station.name);
       if (departureStation) {
-        const fare = calculateFare(departureStation, station.name);
-        if (fare > 0) setAmount(String(fare));
+        if (isCrossLineBlocked(transportType, departureStation, station.name)) {
+          setAmount('');
+          setError('不同路線無法直接搭乘，請分開記錄各線段');
+        } else {
+          setError('');
+          const fare = calculateFare(departureStation, station.name);
+          if (fare > 0) setAmount(String(fare));
+        }
       }
     }
   };
@@ -238,6 +227,11 @@ export function EditTripModal({ trip, isOpen, onClose }: EditTripModalProps) {
 
     if (isStationBased && (!departureStation || !arrivalStation)) {
       setError('請選擇起站和迄站');
+      return;
+    }
+
+    if (isStationBased && isCrossLineBlocked(transportType, departureStation, arrivalStation)) {
+      setError('不同路線無法直接搭乘，請分開記錄各線段');
       return;
     }
 

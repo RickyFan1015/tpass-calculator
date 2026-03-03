@@ -190,14 +190,32 @@ export function Settings() {
         await db.periods.bulkAdd(importData.periods);
       }
 
-      // Import trips
+      // Import trips (migrate legacy transport types)
       if (importData.trips && importData.trips.length > 0) {
-        await db.trips.bulkAdd(importData.trips);
+        const migratedTrips = importData.trips.map(trip => {
+          const tt = trip.transportType as string;
+          return {
+            ...trip,
+            transportType: (tt === 'danhai_lrt' || tt === 'ankeng_lrt'
+              ? 'new_taipei_metro'
+              : trip.transportType) as TransportType
+          };
+        });
+        await db.trips.bulkAdd(migratedTrips);
       }
 
-      // Import commute presets
+      // Import commute presets (migrate legacy transport types)
       if (importData.commutePresets && importData.commutePresets.length > 0) {
-        await db.commutePresets.bulkAdd(importData.commutePresets);
+        const migratedPresets = importData.commutePresets.map(preset => {
+          const tt = preset.transportType as string;
+          return {
+            ...preset,
+            transportType: (tt === 'danhai_lrt' || tt === 'ankeng_lrt'
+              ? 'new_taipei_metro'
+              : preset.transportType) as TransportType
+          };
+        });
+        await db.commutePresets.bulkAdd(migratedPresets);
       }
 
       const summary = [
@@ -313,7 +331,7 @@ export function Settings() {
         <Card>
           <CardBody>
             <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">關於</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">TPASS 省錢計算機 v1.3.4</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">TPASS 省錢計算機 v1.5.0</p>
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
               追蹤你的 TPASS 省錢金額
             </p>

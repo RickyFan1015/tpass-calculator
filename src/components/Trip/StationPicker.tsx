@@ -22,18 +22,6 @@ import {
   type NewTaipeiMetroStation
 } from '../../data/stations/new-taipei-metro-stations';
 import {
-  DANHAI_LRT_STATIONS,
-  DANHAI_LRT_LINES,
-  searchDanhaiStations,
-  type DanhaiLRTStation
-} from '../../data/stations/danhai-lrt-stations';
-import {
-  ANKENG_LRT_STATIONS,
-  ANKENG_LRT_LINES,
-  searchAnkengStations,
-  type AnkengLRTStation
-} from '../../data/stations/ankeng-lrt-stations';
-import {
   TRA_STATIONS,
   TRA_LINES,
   searchTRAStations,
@@ -43,7 +31,7 @@ import {
 /**
  * Generic station type for picker.
  */
-export type Station = MetroStation | TaoyuanMetroStation | NewTaipeiMetroStation | DanhaiLRTStation | AnkengLRTStation | TRAStation;
+export type Station = MetroStation | TaoyuanMetroStation | NewTaipeiMetroStation | TRAStation;
 
 /**
  * Line info type with name and color.
@@ -86,18 +74,6 @@ function getStationData(transportType: TransportType): {
         lines: NEW_TAIPEI_METRO_LINES as Record<string, LineInfo>,
         search: searchNewTaipeiStations
       };
-    case TransportType.DANHAI_LRT:
-      return {
-        stations: DANHAI_LRT_STATIONS,
-        lines: DANHAI_LRT_LINES as Record<string, LineInfo>,
-        search: searchDanhaiStations
-      };
-    case TransportType.ANKENG_LRT:
-      return {
-        stations: ANKENG_LRT_STATIONS,
-        lines: ANKENG_LRT_LINES as Record<string, LineInfo>,
-        search: searchAnkengStations
-      };
     case TransportType.TRA:
       return {
         stations: TRA_STATIONS,
@@ -136,7 +112,7 @@ export function StationPicker({
     [transportType]
   );
 
-  /** Whether this transport type has only one line (e.g. Taoyuan Metro, Ankeng LRT). */
+  /** Whether this transport type has only one line (e.g. Taoyuan Metro). */
   const isSingleLine = useMemo(
     () => Object.keys(lines).length === 1,
     [lines]

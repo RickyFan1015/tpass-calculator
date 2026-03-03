@@ -7,20 +7,13 @@ import { Button, Card, CardBody, Input, Select, Modal, ConfirmModal, TransportIc
 import { StationPicker, type Station } from '../Trip/StationPicker';
 import { getAllTransportTypes, getTransportTypeInfo } from '../../utils/transportTypes';
 import { getNowString } from '../../utils/dateUtils';
-import { getMetroFare } from '../../data/fares/taipei-metro-fares';
-import { getTaoyuanMetroFare } from '../../data/fares/taoyuan-metro-fares';
-import { getNewTaipeiMetroFare } from '../../data/fares/new-taipei-metro-fares';
-import { getDanhaiLRTFare } from '../../data/fares/danhai-lrt-fares';
-import { getAnkengLRTFare } from '../../data/fares/ankeng-lrt-fares';
-import { getTRAFare } from '../../data/fares/tra-fares';
+import { calculateStationFare, isCrossLineBlocked } from '../../utils/fareCalculator';
 
 // Transport types that support station picker
 const STATION_BASED_TYPES: TransportType[] = [
   TransportType.TAIPEI_METRO,
   TransportType.NEW_TAIPEI_METRO,
   TransportType.TAOYUAN_METRO,
-  TransportType.DANHAI_LRT,
-  TransportType.ANKENG_LRT,
   TransportType.TRA
 ];
 
@@ -60,24 +53,7 @@ export function CommutePresetsManager() {
   /**
    * Calculate fare based on transport type and stations.
    */
-  const calculateFare = (type: TransportType, from: string, to: string): number => {
-    switch (type) {
-      case TransportType.TAIPEI_METRO:
-        return getMetroFare(from, to);
-      case TransportType.TAOYUAN_METRO:
-        return getTaoyuanMetroFare(from, to);
-      case TransportType.NEW_TAIPEI_METRO:
-        return getNewTaipeiMetroFare(from, to);
-      case TransportType.DANHAI_LRT:
-        return getDanhaiLRTFare(from, to);
-      case TransportType.ANKENG_LRT:
-        return getAnkengLRTFare(from, to);
-      case TransportType.TRA:
-        return getTRAFare(from, to);
-      default:
-        return 0;
-    }
-  };
+  const calculateFare = calculateStationFare;
 
   const openAddModal = () => {
     setEditingPreset(null);
@@ -110,14 +86,26 @@ export function CommutePresetsManager() {
     if (pickerTarget === 'departure') {
       setDepartureStation(station.name);
       if (arrivalStation) {
-        const fare = calculateFare(transportType, station.name, arrivalStation);
-        if (fare > 0) setAmount(String(fare));
+        if (isCrossLineBlocked(transportType, station.name, arrivalStation)) {
+          setAmount('');
+          setError('不同路線無法直接搭乘，請分開記錄各線段');
+        } else {
+          setError('');
+          const fare = calculateFare(transportType, station.name, arrivalStation);
+          if (fare > 0) setAmount(String(fare));
+        }
       }
     } else {
       setArrivalStation(station.name);
       if (departureStation) {
-        const fare = calculateFare(transportType, departureStation, station.name);
-        if (fare > 0) setAmount(String(fare));
+        if (isCrossLineBlocked(transportType, departureStation, station.name)) {
+          setAmount('');
+          setError('不同路線無法直接搭乘，請分開記錄各線段');
+        } else {
+          setError('');
+          const fare = calculateFare(transportType, departureStation, station.name);
+          if (fare > 0) setAmount(String(fare));
+        }
       }
     }
   };
@@ -139,6 +127,11 @@ export function CommutePresetsManager() {
 
     if (!departureStation || !arrivalStation) {
       setError('Please select both stations');
+      return;
+    }
+
+    if (isCrossLineBlocked(transportType, departureStation, arrivalStation)) {
+      setError('不同路線無法直接搭乘，請分開記錄各線段');
       return;
     }
 

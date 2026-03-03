@@ -3,7 +3,7 @@
 React + TypeScript + Tailwind PWA for tracking TPASS transit savings.
 
 **Live:** https://tpass-calculator.vercel.app/
-**Version:** v1.4.0
+**Version:** v1.5.0
 
 ## Tech Stack
 - Vite + React 18 + TypeScript
@@ -29,7 +29,7 @@ src/
 │   ├── Trip/         # EditTripModal, StationPicker
 │   └── Settings/     # CommutePresetsManager
 ├── data/
-│   ├── stations/     # Taipei Metro, Taoyuan Metro, New Taipei Metro, Danhai LRT, Ankeng LRT, TRA, station-coordinates
+│   ├── stations/     # Taipei Metro, Taoyuan Metro, New Taipei Metro (Y/V/K), TRA, station-coordinates
 │   └── fares/        # Fare matrices for all supported transit systems
 ├── hooks/            # usePeriodCheck, useGeolocation
 ├── pages/            # Home, AddTrip, TripHistory, Periods, PeriodDetail, Settings
@@ -44,7 +44,7 @@ src/
 - Use `const object as const` instead of `enum` (erasableSyntaxOnly)
 - All functions must have JSDoc comments
 
-## Database Schema (Dexie.js v3)
+## Database Schema (Dexie.js v4)
 - `periods`: id, startDate, endDate, status, ticketPrice
 - `trips`: id, periodId, transportType, amount, timestamp, departureStation?, arrivalStation?
 - `settings`: id, defaultBusFare, favoriteStations
@@ -54,10 +54,8 @@ src/
 | System | Station Picker | Auto Fare Calculation |
 |--------|---------------|----------------------|
 | Taipei Metro | Yes | Yes |
-| New Taipei Metro (Circular Line) | Yes | Yes |
+| New Taipei Metro (Y: Circular, V: Danhai LRT, K: Ankeng LRT) | Yes | Yes (same-line only) |
 | Taoyuan Airport MRT | Yes | Yes |
-| Danhai LRT | Yes | Yes |
-| Ankeng LRT | Yes | Yes |
 | TRA (Taiwan Railway) | Yes | Yes |
 | Bus | No | Yes (by segments) |
 | Highway Bus | No | Manual |
@@ -90,7 +88,7 @@ src/
 - 2x2 grid layout with gradient colors
 
 ### Add Trip
-- Grouped transport type selector (5 main + 2 expandable groups)
+- Grouped transport type selector (5 main + 1 expandable group)
 - Auto-fill last used stations for each transport type
 - Swap button to reverse departure/arrival stations
 - Auto fare calculation when both stations selected
@@ -140,6 +138,7 @@ src/
 - [x] Transport distribution bar on home page
 - [x] Quick button haptic feedback, success animation & toast notification
 - [x] GPS nearby station recommendations in StationPicker
+- [x] Merged New Taipei Metro lines (Circular, Danhai LRT, Ankeng LRT) into single transport type
 
 ## TODO (Optional)
 - [ ] Refund calculator

@@ -5,8 +5,6 @@ export const TransportType = {
   TAIPEI_METRO: 'taipei_metro',
   NEW_TAIPEI_METRO: 'new_taipei_metro',
   TAOYUAN_METRO: 'taoyuan_metro',
-  DANHAI_LRT: 'danhai_lrt',
-  ANKENG_LRT: 'ankeng_lrt',
   TRA: 'tra',
   BUS: 'bus',
   HIGHWAY_BUS: 'highway_bus',
