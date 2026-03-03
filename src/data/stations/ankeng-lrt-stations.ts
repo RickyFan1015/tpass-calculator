@@ -16,15 +16,15 @@ export const ANKENG_LRT_LINES = {
 } as const;
 
 export const ANKENG_LRT_STATIONS: AnkengLRTStation[] = [
-  { code: 'K01', name: '十四張', nameEn: 'Shisizhang', line: 'K', transferLines: ['Y'] },
-  { code: 'K02', name: '陽光運動公園', nameEn: 'Sunshine Sports Park', line: 'K' },
-  { code: 'K03', name: '新和國小', nameEn: 'Xinhe Elementary School', line: 'K' },
-  { code: 'K04', name: '安康', nameEn: 'Ankang', line: 'K' },
+  { code: 'K01', name: '雙城', nameEn: 'Shuangcheng', line: 'K' },
+  { code: 'K02', name: '玫瑰中國城', nameEn: 'Rose Chinatown', line: 'K' },
+  { code: 'K03', name: '台北小城', nameEn: 'Taipei Small Town', line: 'K' },
+  { code: 'K04', name: '耕莘安康院區', nameEn: 'Cardinal Tien Ankang', line: 'K' },
   { code: 'K05', name: '景文科大', nameEn: 'Jinwen University', line: 'K' },
-  { code: 'K06', name: '耕莘安康院區', nameEn: 'Cardinal Tien Ankang', line: 'K' },
-  { code: 'K07', name: '安坑國小', nameEn: 'Ankeng Elementary School', line: 'K' },
-  { code: 'K08', name: '雙城', nameEn: 'Shuangcheng', line: 'K' },
-  { code: 'K09', name: '玫瑰中國城', nameEn: 'Rose Chinatown', line: 'K' }
+  { code: 'K06', name: '安康', nameEn: 'Ankang', line: 'K' },
+  { code: 'K07', name: '陽光運動公園', nameEn: 'Sunshine Sports Park', line: 'K' },
+  { code: 'K08', name: '新和國小', nameEn: 'Xinhe Elementary School', line: 'K' },
+  { code: 'K09', name: '十四張', nameEn: 'Shisizhang', line: 'K', transferLines: ['Y'] }
 ];
 
 /**

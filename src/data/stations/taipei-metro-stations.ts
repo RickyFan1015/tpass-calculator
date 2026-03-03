@@ -48,7 +48,7 @@ export const TAIPEI_METRO_STATIONS: MetroStation[] = [
 
   // Tamsui-Xinyi Line (R)
   { code: 'R02', name: '淡水', nameEn: 'Tamsui', line: 'R' },
-  { code: 'R03', name: '紅樹林', nameEn: 'Hongshulin', line: 'R' },
+  { code: 'R03', name: '紅樹林', nameEn: 'Hongshulin', line: 'R', transferLines: ['V'] },
   { code: 'R04', name: '竹圍', nameEn: 'Zhuwei', line: 'R' },
   { code: 'R05', name: '關渡', nameEn: 'Guandu', line: 'R' },
   { code: 'R06', name: '忠義', nameEn: 'Zhongyi', line: 'R' },

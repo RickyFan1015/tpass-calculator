@@ -1,6 +1,6 @@
 /**
  * Station coordinates lookup table for GPS-based nearby station recommendations.
- * Key: station code (e.g., 'BR01', 'A1', 'Y06')
+ * Key: station code (e.g., 'BR01', 'A1', 'Y07')
  * Value: { lat, lng } in WGS84 decimal degrees
  *
  * Sources:
@@ -166,21 +166,20 @@ export const STATION_COORDINATES: Record<string, { lat: number; lng: number }> =
   A22: { lat: 24.981600, lng: 121.225300 },
 
   // ===== New Taipei Metro - Circular Line (Y) =====
-  Y06: { lat: 24.982899, lng: 121.541352 },
-  Y07: { lat: 25.061548, lng: 121.459926 },
-  Y08: { lat: 25.047400, lng: 121.458100 },
-  Y09: { lat: 25.039705, lng: 121.461746 },
-  Y10: { lat: 25.024600, lng: 121.468500 },
-  Y11: { lat: 25.013618, lng: 121.462302 },
-  Y12: { lat: 25.007700, lng: 121.468700 },
-  Y13: { lat: 25.003300, lng: 121.473300 },
-  Y14: { lat: 24.999600, lng: 121.480800 },
-  Y15: { lat: 24.996700, lng: 121.487700 },
-  Y16: { lat: 24.995300, lng: 121.495300 },
-  Y17: { lat: 24.993905, lng: 121.505113 },
-  Y18: { lat: 24.994800, lng: 121.510500 },
-  Y19: { lat: 24.996000, lng: 121.513900 },
-  Y20: { lat: 24.997800, lng: 121.516900 },
+  Y07: { lat: 24.982899, lng: 121.541352 },
+  Y08: { lat: 24.982930, lng: 121.534010 },
+  Y09: { lat: 24.990549, lng: 121.525051 },
+  Y10: { lat: 24.991968, lng: 121.516553 },
+  Y11: { lat: 24.993905, lng: 121.505113 },
+  Y12: { lat: 25.001981, lng: 121.496052 },
+  Y13: { lat: 25.004413, lng: 121.490461 },
+  Y14: { lat: 25.008410, lng: 121.484159 },
+  Y15: { lat: 25.014491, lng: 121.472212 },
+  Y16: { lat: 25.015156, lng: 121.464825 },
+  Y17: { lat: 25.026125, lng: 121.466839 },
+  Y18: { lat: 25.039735, lng: 121.461655 },
+  Y19: { lat: 25.050282, lng: 121.460216 },
+  Y20: { lat: 25.061548, lng: 121.459926 },
 
   // ===== Danhai LRT - Green Mountain Line (V) =====
   V01: { lat: 25.154042, lng: 121.458872 },
@@ -200,15 +199,15 @@ export const STATION_COORDINATES: Record<string, { lat: number; lng: number }> =
   V28: { lat: 25.171800, lng: 121.409700 },
 
   // ===== Ankeng LRT (K) =====
-  K01: { lat: 24.997800, lng: 121.516900 },
-  K02: { lat: 24.990900, lng: 121.514200 },
-  K03: { lat: 24.984300, lng: 121.509000 },
-  K04: { lat: 24.978100, lng: 121.505500 },
+  K01: { lat: 24.955600, lng: 121.488700 },
+  K02: { lat: 24.950400, lng: 121.485100 },
+  K03: { lat: 24.961300, lng: 121.492700 },
+  K04: { lat: 24.966800, lng: 121.498300 },
   K05: { lat: 24.972000, lng: 121.500700 },
-  K06: { lat: 24.966800, lng: 121.498300 },
-  K07: { lat: 24.961300, lng: 121.492700 },
-  K08: { lat: 24.955600, lng: 121.488700 },
-  K09: { lat: 24.950400, lng: 121.485100 },
+  K06: { lat: 24.978100, lng: 121.505500 },
+  K07: { lat: 24.990900, lng: 121.514200 },
+  K08: { lat: 24.984300, lng: 121.509000 },
+  K09: { lat: 24.982930, lng: 121.534010 },
 
   // ===== TRA - Taiwan Railways (Keelung to Zhongli) =====
   TRA01: { lat: 25.131300, lng: 121.739900 },
