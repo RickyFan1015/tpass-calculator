@@ -1,9 +1,12 @@
 import { useState, useRef } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../utils/db';
-import { Card, CardBody, Button, Input, ConfirmModal } from '../components/common';
+import { Card, CardBody } from '../components/common/Card';
+import { Button } from '../components/common/Button';
+import { Input } from '../components/common/Input';
+import { ConfirmModal } from '../components/common/Modal';
 import { PageHeader } from '../components/common/Layout';
-import { CommutePresetsManager } from '../components/Settings';
+import { CommutePresetsManager } from '../components/Settings/CommutePresetsManager';
 import { getNowString } from '../utils/dateUtils';
 import { getMetroFare } from '../data/fares/taipei-metro-fares';
 import { TransportType } from '../types';

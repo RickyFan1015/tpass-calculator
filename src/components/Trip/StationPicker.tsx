@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Modal, Input } from '../common';
+import { Modal } from '../common/Modal';
+import { Input } from '../common/Input';
 import { TransportType } from '../../types';
 import { useGeolocation } from '../../hooks/useGeolocation';
 import { findNearbyStations, formatDistance } from '../../utils/geoUtils';
